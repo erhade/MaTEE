@@ -17,7 +17,7 @@ objs		:=
 # Disable all builtin rules
 .SUFFIXES:
 
-comp-cflags$(sm) = -std=gnu11
+comp-cflags$(sm) = -std=gnu11 -march=armv8.6-a
 comp-aflags$(sm) =
 comp-cppflags$(sm) =
 

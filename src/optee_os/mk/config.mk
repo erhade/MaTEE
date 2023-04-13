@@ -951,7 +951,7 @@ $(eval $(call cfg-enable-all-depends,CFG_MEMPOOL_REPORT_LAST_OFFSET, \
 #
 # The CFG_TA_PAUTH option enables these instructions for TA's at EL0. When
 # this option is enabled, TEE core will initialize secret keys per TA.
-CFG_CORE_PAUTH ?= n
+CFG_CORE_PAUTH ?= y
 CFG_TA_PAUTH ?= $(CFG_CORE_PAUTH)
 
 $(eval $(call cfg-depends-all,CFG_CORE_PAUTH,CFG_ARM64_core))

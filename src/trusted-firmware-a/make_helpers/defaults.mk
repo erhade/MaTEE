@@ -66,7 +66,7 @@ CTX_INCLUDE_FPREGS		:= 0
 # Include pointer authentication (ARMv8.3-PAuth) registers in cpu context. This
 # must be set to 1 if the platform wants to use this feature in the Secure
 # world. It is not needed to use it in the Non-secure world.
-CTX_INCLUDE_PAUTH_REGS		:= 0
+CTX_INCLUDE_PAUTH_REGS		:= 1
 
 # Include Nested virtualization control (Armv8.4-NV) registers in cpu context.
 # This must be set to 1 if architecture implements Nested Virtualization
@@ -131,7 +131,7 @@ ENABLE_BTI			:= 0
 # Flag to enable Pointer Authentication.
 # Internal flag not meant for direct setting.
 # Use BRANCH_PROTECTION to enable PAUTH.
-ENABLE_PAUTH			:= 0
+ENABLE_PAUTH			:= 1
 
 # Flag to enable access to the HAFGRTR_EL2 register
 ENABLE_FEAT_AMUv1		:= 0
