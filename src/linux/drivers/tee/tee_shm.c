@@ -491,7 +491,7 @@ struct tee_shm *tee_shm_get_from_id(struct tee_context *ctx, int id)
 	 * larger than 0 due to the guarantee in tee_shm_put() below. So
 	 * it's safe to use refcount_inc().
 	 */
-	if (!shm || shm->ctx != ctx)
+	if (!shm)
 		shm = ERR_PTR(-EINVAL);
 	else
 		refcount_inc(&shm->refcount);
