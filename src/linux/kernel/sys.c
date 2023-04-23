@@ -208,6 +208,13 @@ out:
 	return error;
 }
 
+SYSCALL_DEFINE0(cacheflush)
+{
+	__asm__ __volatile__("ic ialluis");
+
+	return 0;
+}
+
 SYSCALL_DEFINE3(setpriority, int, which, int, who, int, niceval)
 {
 	struct task_struct *g, *p;
