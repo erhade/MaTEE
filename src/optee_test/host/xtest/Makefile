@@ -74,8 +74,8 @@ srcs +=	adbg/src/adbg_case.c \
 	regression_4100.c \
 	regression_5000.c \
 	regression_6000.c \
-	regression_8000.c \
 	regression_8100.c \
+	globalVal_1000.c \
 	hash_perf.c \
 	stats.c \
 	xtest_helpers.c \
@@ -137,6 +137,11 @@ CFLAGS += -I../../ta/tpm_log_test/include
 CFLAGS += -I../../ta/large/include
 CFLAGS += -I../../ta/supp_plugin/include
 CFLAGS += -I../../ta/bti_test/include
+CFLAGS += -I../../ta/global_variable/include
+CFLAGS += -I../../ta/ctx_variable/include
+CFLAGS += -I../../ta/instance_variable/include
+CFLAGS += -I../../ta/heap_param/include
+CFLAGS += -I../../ta/heap_param_pac/include
 CFLAGS += -I../../ta/subkey1/include
 CFLAGS += -I../../ta/subkey2/include
 

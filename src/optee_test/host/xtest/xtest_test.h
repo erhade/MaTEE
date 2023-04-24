@@ -141,6 +141,11 @@ extern const TEEC_UUID large_ta_uuid;
 extern const TEEC_UUID bti_test_ta_uuid;
 extern const TEEC_UUID subkey1_ta_uuid;
 extern const TEEC_UUID subkey2_ta_uuid;
+extern const TEEC_UUID global_variable_uuid;
+extern const TEEC_UUID ctx_variable_uuid;
+extern const TEEC_UUID instance_variable_uuid;
+extern const TEEC_UUID heap_param_uuid;
+extern const TEEC_UUID heap_param_pac_uuid;
 extern char *xtest_tee_name;
 
 #endif /*XTEST_TEST_H*/

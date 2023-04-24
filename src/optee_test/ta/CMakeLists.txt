@@ -21,6 +21,11 @@ target_include_directories(${PROJECT_NAME}
 	INTERFACE storage_benchmark/include
 	INTERFACE tpm_log_test/include
 	INTERFACE bti_test/include
+	INTERFACE global_variable/include
+	INTERFACE ctx_variable/include
+	INTERFACE instance_variable/include
+	INTERFACE heap_param/include
+	INTERFACE heap_param_pac/include
 	INTERFACE supp_plugin/include
 	INTERFACE large/include
 	INTERFACE subkey1/include

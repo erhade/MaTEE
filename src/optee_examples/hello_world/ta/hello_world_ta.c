@@ -133,6 +133,24 @@ static TEE_Result dec_value(uint32_t param_types,
 
 	return TEE_SUCCESS;
 }
+
+TEE_Result time_wait(uint32_t param_types, TEE_Param params[4])
+{
+	TEE_Result res = TEE_SUCCESS;
+	(void)param_types;
+
+	TEE_UnmaskCancellation();
+
+	/* Wait */
+	res = TEE_Wait(params[0].value.a);
+	if (res != TEE_SUCCESS)
+	{	
+		DMSG ("*****TA Cancel*****\n");
+	}
+
+	return res;
+}
+
 /*
  * Called when a TA is invoked. sess_ctx hold that value that was
  * assigned by TA_OpenSessionEntryPoint(). The rest of the paramters
@@ -149,6 +167,8 @@ TEE_Result TA_InvokeCommandEntryPoint(void __maybe_unused *sess_ctx,
 		return inc_value(param_types, params);
 	case TA_HELLO_WORLD_CMD_DEC_VALUE:
 		return dec_value(param_types, params);
+	case TA_HELLO_WORLD_CMD_TIME_WAIT:
+		return time_wait(param_types, params);
 	default:
 		return TEE_ERROR_BAD_PARAMETERS;
 	}

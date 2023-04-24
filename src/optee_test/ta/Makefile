@@ -34,7 +34,12 @@ TA_DIRS := create_fail_test \
 	   supp_plugin \
 	   large \
 	   subkey1 \
-	   subkey2
+	   subkey2 \
+	   global_variable \
+	   ctx_variable \
+	   instance_variable \
+	   heap_param \
+	   heap_param_pac
 
 ifeq ($(CFG_SECURE_DATA_PATH),y)
 TA_DIRS += sdp_basic

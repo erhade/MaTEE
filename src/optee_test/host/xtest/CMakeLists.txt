@@ -53,8 +53,8 @@ set (SRC
 	regression_4100.c
 	regression_5000.c
 	regression_6000.c
-	regression_8000.c
 	regression_8100.c
+	globalVal_1000.c
 	hash_perf.c
 	stats.c
 	xtest_helpers.c

@@ -18,6 +18,7 @@
 #include <tee_api_types.h>
 #include <tee_api_compat.h>
 #include <util.h>
+#include <enc_fs_key_manager_test.h>
 
 #define DEFINE_TEST_MULTIPLE_STORAGE_IDS(test_name)		 \
 static void test_name(ADBG_Case_t *c)				 \
@@ -2254,3 +2255,38 @@ exit1:
 DEFINE_TEST_MULTIPLE_STORAGE_IDS(xtest_tee_test_6020)
 ADBG_CASE_DEFINE(regression, 6020, xtest_tee_test_6020,
 		 "Object IDs in SHM (negative)");
+
+static TEEC_Result enc_fs_km_self_test(TEEC_Session *sess)
+{
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	uint32_t org = 0;
+
+	res = TEEC_InvokeCommand(sess, CMD_SELF_TESTS, &op, &org);
+	return res;
+}
+
+/* secure storage key manager self test */
+static void xtest_tee_test_6021(ADBG_Case_t *c)
+{
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	TEEC_Session sess = { };
+	uint32_t orig = 0;
+
+	res = xtest_teec_open_session(&sess,
+			&enc_fs_key_manager_test_ta_uuid,
+			NULL, &orig);
+	if (res != TEEC_SUCCESS) {
+		Do_ADBG_Log("Ignore test due to TA does not exist");
+		return;
+	}
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(
+		    c, enc_fs_km_self_test(&sess)))
+		goto exit;
+
+exit:
+	TEEC_CloseSession(&sess);
+}
+ADBG_CASE_DEFINE(regression, 6021, xtest_tee_test_6021,
+	"Secure Storage Key Manager API Self Test");

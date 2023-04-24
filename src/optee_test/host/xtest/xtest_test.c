@@ -25,6 +25,11 @@
 #include <ta_arm_bti.h>
 #include <ta_subkey1.h>
 #include <ta_subkey2.h>
+#include <global_variable_ta.h>
+#include <ctx_variable_ta.h>
+#include <instance_variable_ta.h>
+#include <heap_param_ta.h>
+#include <heap_param_pac_ta.h>
 #include <tee_api_defines.h>
 #include <tee_client_api.h>
 #include <__tee_isocket_defines.h>
@@ -206,3 +211,8 @@ const TEEC_UUID large_ta_uuid = TA_LARGE_UUID;
 const TEEC_UUID bti_test_ta_uuid = TA_BTI_UUID;
 const TEEC_UUID subkey1_ta_uuid = TA_SUBKEY1_UUID;
 const TEEC_UUID subkey2_ta_uuid = TA_SUBKEY2_UUID;
+const TEEC_UUID global_variable_uuid = TA_GLOBAL_VARIABLE_UUID;
+const TEEC_UUID ctx_variable_uuid = TA_CTX_VARIABLE_UUID;
+const TEEC_UUID instance_variable_uuid = TA_INSTANCE_VARIABLE_UUID;
+const TEEC_UUID heap_param_uuid = TA_HEAP_PARAM_UUID;
+const TEEC_UUID heap_param_pac_uuid = TA_HEAP_PARAM_PAC_UUID;

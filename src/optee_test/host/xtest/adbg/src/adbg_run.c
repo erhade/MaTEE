@@ -7,6 +7,32 @@
  * 1. Includes
  ************************************************************************/
 #include "adbg_int.h"
+#include "time.h"
+
+#define TEST_GROUP_SIZE	8
+
+static long get_current_time(struct timespec *ts)
+{
+	if (clock_gettime(CLOCK_REALTIME, ts) < 0) {
+		perror("clock_gettime");
+		exit(1);
+	}
+	return 0;
+}
+
+static uint64_t timespec_diff_ns(struct timespec *start, struct timespec *end)
+{
+	uint64_t ns = 0;
+
+	if (end->tv_nsec < start->tv_nsec) {
+		ns += 1000000000 * (end->tv_sec - start->tv_sec - 1);
+		ns += 1000000000 - start->tv_nsec + end->tv_nsec;
+	} else {
+		ns += 1000000000 * (end->tv_sec - start->tv_sec);
+		ns += end->tv_nsec - start->tv_nsec;
+	}
+	return ns;
+}
 
 /*************************************************************************
  * 2. Definition of external constants and variables
@@ -113,6 +139,17 @@ static int ADBG_RunSuite(
 	size_t NumSkippedTestCases = 0;
 	int failed_test = 0;
 	struct adbg_case_def *case_def = NULL;
+	const char *substr[TEST_GROUP_SIZE] = {"regression_1", "regression_2", 
+		"regression_40", "regression_41", "regression_5", "regression_6", 
+		"regression_8", "pkcs11_1"};
+	const char *group_str[] = {"OS core features", "Network socket", 
+		"Cryptographic algorithms", "TEE Internal Arithmetical API", 
+		"Global Platform API", "Storage", "mbed TLS", "PKCS11"};
+	float spent_time[TEST_GROUP_SIZE] = {0};
+	uint64_t t;
+	double x;
+	struct timespec t0 = { };
+	struct timespec t1 = { };
 
 	Do_ADBG_Log("######################################################");
 	Do_ADBG_Log("#");
@@ -154,6 +191,7 @@ static int ADBG_RunSuite(
 
 		TAILQ_INSERT_TAIL(&Runner_p->CasesList, Case_p, Link);
 
+		get_current_time(&t0);
 		/* Start the parent test case */
 		Do_ADBG_BeginSubCase(Case_p, "%s", case_def->Title_p);
 
@@ -165,6 +203,15 @@ static int ADBG_RunSuite(
 
 		/* End the parent test case */
 		Do_ADBG_EndSubCase(Case_p, "%s", case_def->Title_p);
+		get_current_time(&t1);
+		t = timespec_diff_ns(&t0, &t1);
+		x = (double)t;
+		for (i = 0; i < TEST_GROUP_SIZE; i++)
+		{
+			if (strstr(case_def->TestID_p, substr[i]) != NULL)
+				spent_time[i] += x;
+		}
+		Do_ADBG_Log("[time is %gs]", x / 1000000000);
 
 		/* Sum up the errors */
 		Runner_p->Result.NumTests += Case_p->Result.NumTests +
@@ -237,6 +284,13 @@ static int ADBG_RunSuite(
 		}
 	}
 
+
+	Do_ADBG_Log("+-----------------------------------------------------");
+	for (int i = 0; i < TEST_GROUP_SIZE; i++)
+	{
+		Do_ADBG_Log("Time of %s is: %gs", group_str[i], spent_time[i] / 1000000000);
+	}
+	
 
 	Do_ADBG_Log("+-----------------------------------------------------");
 	if (Runner_p->Result.AbortTestSuite)

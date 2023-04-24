@@ -118,6 +118,10 @@ extern "C" {
 #define TEEC_MEMREF_PARTIAL_OUTPUT  0x0000000E
 #define TEEC_MEMREF_PARTIAL_INOUT   0x0000000F
 
+#define TEEC_INVARIANT_VALUE_INPUT	0x00000001
+#define TEEC_INVARIANT_VALUE_OUTPUT	0x00000002
+#define TEEC_INVARIANT_VALUE_INOUT	0x00000003
+
 /**
  * Flag constants indicating the data transfer direction of memory in
  * TEEC_Parameter. TEEC_MEM_INPUT signifies data transfer direction from the
