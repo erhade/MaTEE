@@ -1,3 +1,4 @@
+.vscode/*
 src/edk2-platforms/Build/*
 src/out-br/*
 src/out/*
