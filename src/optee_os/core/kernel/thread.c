@@ -157,6 +157,7 @@ get_core_local(unsigned int pos)
 	assert(thread_get_exceptions() & THREAD_EXCP_FOREIGN_INTR);
 
 	assert(pos < CFG_TEE_CORE_NB_CORE);
+	thread_core_local[pos].core_pos = pos;
 	return &thread_core_local[pos];
 }
 

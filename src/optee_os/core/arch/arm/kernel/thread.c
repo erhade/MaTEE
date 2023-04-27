@@ -228,12 +228,10 @@ static void __thread_alloc_and_run(uint32_t a0, uint32_t a1, uint32_t a2,
 
 	thread_lock_global();
 
-	for (n = 0; n < CFG_NUM_THREADS; n++) {
-		if (threads[n].state == THREAD_STATE_FREE) {
-			threads[n].state = THREAD_STATE_ACTIVE;
-			found_thread = true;
-			break;
-		}
+	if (threads[l->core_pos].state == THREAD_STATE_FREE) {
+		threads[l->core_pos].state = THREAD_STATE_ACTIVE;
+		found_thread = true;
+		n = l->core_pos;
 	}
 
 	thread_unlock_global();
