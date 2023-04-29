@@ -55,7 +55,7 @@ struct thread_core_local {
 	short int curr_thread;
 	uint32_t flags;
 	vaddr_t abt_stack_va_end;
-	uint32_t core_pos;
+	uint32_t cmd;
 #ifdef CFG_TEE_CORE_DEBUG
 	unsigned int locked_count; /* Number of spinlocks held */
 #endif

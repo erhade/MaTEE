@@ -476,6 +476,7 @@ static int optee_shm_register(struct tee_context *ctx, struct tee_shm *shm,
 	memset(msg_arg, 0, OPTEE_MSG_GET_ARG_SIZE(1));
 	msg_arg->num_params = 1;
 	msg_arg->cmd = OPTEE_MSG_CMD_REGISTER_SHM;
+	shm_arg->cmd = OPTEE_MSG_CMD_REGISTER_SHM;
 	msg_arg->params->attr = OPTEE_MSG_ATTR_TYPE_TMEM_OUTPUT |
 				OPTEE_MSG_ATTR_NONCONTIG;
 	msg_arg->params->u.tmem.shm_ref = (unsigned long)shm;
@@ -527,6 +528,7 @@ static int optee_shm_unregister(struct tee_context *ctx, struct tee_shm *shm)
 	memset(msg_arg, 0, sz);
 	msg_arg->num_params = 1;
 	msg_arg->cmd = OPTEE_MSG_CMD_UNREGISTER_SHM;
+	shm_arg->cmd = OPTEE_MSG_CMD_UNREGISTER_SHM;
 	msg_arg->params[0].attr = OPTEE_MSG_ATTR_TYPE_RMEM_INPUT;
 	msg_arg->params[0].u.rmem.shm_ref = (unsigned long)shm;
 
@@ -874,6 +876,11 @@ static int optee_smc_do_call_with_arg(struct tee_context *ctx,
 	struct optee_msg_arg *rpc_arg = NULL;
 	int rc;
 
+	pid_t pid;
+	struct task_struct *task;
+	task = get_current();
+	pid = task_pid_nr(task);
+
 	if (optee->rpc_param_count) {
 		struct optee_msg_arg *arg;
 		unsigned int rpc_arg_offs;
@@ -905,6 +912,10 @@ static int optee_smc_do_call_with_arg(struct tee_context *ctx,
 			param.a0 = OPTEE_SMC_CALL_WITH_ARG;
 		reg_pair_from_64(&param.a1, &param.a2, parg);
 	}
+
+	param.a4 = pid;
+	param.a5 = shm->cmd;
+
 	/* Initialize waiter */
 	optee_cq_wait_init(&optee->call_queue, &w);
 	while (true) {
@@ -957,6 +968,7 @@ static int simple_call_with_arg(struct tee_context *ctx, u32 cmd)
 		return PTR_ERR(msg_arg);
 
 	msg_arg->cmd = cmd;
+	shm->cmd = cmd;
 	optee_smc_do_call_with_arg(ctx, shm, offs);
 
 	optee_free_msg_arg(ctx, entry, offs);

@@ -39,6 +39,7 @@ struct thread_ctx {
 	uint32_t flags;
 	struct core_mmu_user_map user_map;
 	bool have_user_map;
+	uint32_t pid;
 #ifdef ARM64
 	vaddr_t kern_sp;	/* Saved kernel SP during user TA execution */
 #endif

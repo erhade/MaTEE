@@ -70,7 +70,7 @@ uint32_t thread_handle_std_smc(uint32_t a0, uint32_t a1, uint32_t a2,
 		thread_resume_from_rpc(a3, a1, a2, a4, a5);
 		rv = OPTEE_SMC_RETURN_ERESUME;
 	} else {
-		thread_alloc_and_run(a0, a1, a2, a3, 0, 0);
+		thread_alloc_and_run(a0, a1, a2, a3, a4, a5);
 		rv = OPTEE_SMC_RETURN_ETHREAD_LIMIT;
 	}
 

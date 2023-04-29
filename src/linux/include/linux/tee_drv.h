@@ -215,6 +215,7 @@ struct tee_shm {
 	u32 flags;
 	int id;
 	u64 sec_world_id;
+	u32 cmd;
 };
 
 /**

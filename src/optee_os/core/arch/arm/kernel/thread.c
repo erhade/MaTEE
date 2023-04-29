@@ -228,10 +228,23 @@ static void __thread_alloc_and_run(uint32_t a0, uint32_t a1, uint32_t a2,
 
 	thread_lock_global();
 
-	if (threads[l->core_pos].state == THREAD_STATE_FREE) {
-		threads[l->core_pos].state = THREAD_STATE_ACTIVE;
-		found_thread = true;
-		n = l->core_pos;
+	for (n = 0; n < CFG_NUM_THREADS; n++) {
+		if (threads[n].pid == a4) {
+			threads[n].state = THREAD_STATE_ACTIVE;
+			found_thread = true;
+			break;
+		}
+	}
+
+	if (!found_thread) {
+		for (n = 0; n < CFG_NUM_THREADS; n++) {
+			if (threads[n].state == THREAD_STATE_FREE) {
+				threads[n].state = THREAD_STATE_ACTIVE;
+				threads[n].pid = a4;
+				found_thread = true;
+				break;
+			}
+		}
 	}
 
 	thread_unlock_global();
@@ -240,6 +253,7 @@ static void __thread_alloc_and_run(uint32_t a0, uint32_t a1, uint32_t a2,
 		return;
 
 	l->curr_thread = n;
+	l->cmd = a5;
 
 	threads[n].flags = 0;
 	init_regs(threads + n, a0, a1, a2, a3, a4, a5, a6, a7, pc);
@@ -443,6 +457,8 @@ void thread_state_free(void)
 	assert(threads[ct].state == THREAD_STATE_ACTIVE);
 	threads[ct].state = THREAD_STATE_FREE;
 	threads[ct].flags = 0;
+	if (l->cmd == OPTEE_MSG_CMD_RELEASE)
+		threads[ct].pid = 0;
 	l->curr_thread = THREAD_ID_INVALID;
 
 	if (IS_ENABLED(CFG_NS_VIRTUALIZATION))

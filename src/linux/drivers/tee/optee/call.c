@@ -298,6 +298,7 @@ int optee_open_session(struct tee_context *ctx,
 		return PTR_ERR(msg_arg);
 
 	msg_arg->cmd = OPTEE_MSG_CMD_OPEN_SESSION;
+	shm->cmd = OPTEE_MSG_CMD_OPEN_SESSION;
 	msg_arg->cancel_id = arg->cancel_id;
 
 	/*
@@ -360,7 +361,7 @@ out:
 	return rc;
 }
 
-int optee_close_session_helper(struct tee_context *ctx, u32 session)
+int optee_close_session_helper(struct tee_context *ctx, u32 session, u32 cmd)
 {
 	struct optee *optee = tee_get_drvdata(ctx->teedev);
 	struct optee_shm_arg_entry *entry;
@@ -373,6 +374,7 @@ int optee_close_session_helper(struct tee_context *ctx, u32 session)
 		return PTR_ERR(msg_arg);
 
 	msg_arg->cmd = OPTEE_MSG_CMD_CLOSE_SESSION;
+	shm->cmd = cmd;
 	msg_arg->session = session;
 	optee->ops->do_call_with_arg(ctx, shm, offs);
 
@@ -396,7 +398,7 @@ int optee_close_session(struct tee_context *ctx, u32 session)
 		return -EINVAL;
 	kfree(sess);
 
-	return optee_close_session_helper(ctx, session);
+	return optee_close_session_helper(ctx, session, OPTEE_MSG_CMD_CLOSE_SESSION);
 }
 
 int optee_invoke_func(struct tee_context *ctx, struct tee_ioctl_invoke_arg *arg,
@@ -423,6 +425,7 @@ int optee_invoke_func(struct tee_context *ctx, struct tee_ioctl_invoke_arg *arg,
 	if (IS_ERR(msg_arg))
 		return PTR_ERR(msg_arg);
 	msg_arg->cmd = OPTEE_MSG_CMD_INVOKE_COMMAND;
+	shm->cmd = OPTEE_MSG_CMD_INVOKE_COMMAND;
 	msg_arg->func = arg->func;
 	msg_arg->session = arg->session;
 	msg_arg->cancel_id = arg->cancel_id;
@@ -472,6 +475,7 @@ int optee_cancel_req(struct tee_context *ctx, u32 cancel_id, u32 session)
 		return PTR_ERR(msg_arg);
 
 	msg_arg->cmd = OPTEE_MSG_CMD_CANCEL;
+	shm->cmd = OPTEE_MSG_CMD_CANCEL;
 	msg_arg->session = session;
 	msg_arg->cancel_id = cancel_id;
 	optee->ops->do_call_with_arg(ctx, shm, offs);
