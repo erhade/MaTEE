@@ -1,5 +1,5 @@
 00_header
-10_*
+10_linux
 20_linux_xen
 30_os-prober
 40_custom
@@ -18,7 +18,7 @@ cdboot_test
 cmp_test
 config.cache
 config.guess
-config.h
+/config.h
 config-util.h
 config-util.h.in
 config.log
@@ -38,7 +38,6 @@ example_unit_test
 *.exec.exe
 fddboot_test
 genkernsyms.sh
-gensymlist.sh
 gentrigtables
 gentrigtables.exe
 gettext_strings_test
@@ -178,8 +177,8 @@ GSYMS
 GTAGS
 compile
 depcomp
-mdate-sh
-texinfo.tex
+/build-aux/mdate-sh
+/build-aux/texinfo.tex
 grub-core/lib/libgcrypt-grub
 .deps
 .deps-util
