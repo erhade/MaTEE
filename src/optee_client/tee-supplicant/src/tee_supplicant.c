@@ -77,7 +77,7 @@ union tee_rpc_invoke {
 };
 
 struct tee_shm {
-	int id;
+	int64_t id;
 	void *p;
 	size_t size;
 	bool registered;
@@ -336,6 +336,8 @@ static struct tee_shm *alloc_shm(int fd, size_t size)
 		return NULL;
 	}
 
+	data.id &= 0xFFFFFFFFFFFF;
+
 	shm->p = mmap(NULL, data.size, PROT_READ | PROT_WRITE, MAP_SHARED,
 		      shm->fd, 0);
 	if (shm->p == (void *)MAP_FAILED) {
@@ -376,6 +378,8 @@ static struct tee_shm *register_local_shm(int fd, size_t size)
 		free(buf);
 		return NULL;
 	}
+
+	data.id &= 0xFFFFFFFFFFFF;
 
 	shm->p = buf;
 	shm->registered = true;

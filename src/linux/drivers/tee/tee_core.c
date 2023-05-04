@@ -289,6 +289,8 @@ static int tee_ioctl_shm_alloc(struct tee_context *ctx,
 	long ret;
 	struct tee_ioctl_shm_alloc_data data;
 	struct tee_shm *shm;
+	s64 s_id;
+	u64 modifier = 0;
 
 	if (copy_from_user(&data, udata, sizeof(data)))
 		return -EFAULT;
@@ -300,8 +302,12 @@ static int tee_ioctl_shm_alloc(struct tee_context *ctx,
 	shm = tee_shm_alloc_user_buf(ctx, data.size);
 	if (IS_ERR(shm))
 		return PTR_ERR(shm);
+	s_id = shm->id;
+	printk("Before PAC: 0x%016llX\n", s_id);
+	asm("pacia %[reg], %[mod]" : [reg] "+r" (s_id) : [mod] "r" (modifier) : );
+	printk("After  PAC: 0x%016llX\n", s_id);
 
-	data.id = shm->id;
+	data.id = s_id;
 	data.size = shm->size;
 
 	if (copy_to_user(udata, &data, sizeof(data)))
@@ -325,6 +331,8 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	long ret;
 	struct tee_ioctl_shm_register_data data;
 	struct tee_shm *shm;
+	s64 s_id;
+	u64 modifier = 0;
 
 	if (copy_from_user(&data, udata, sizeof(data)))
 		return -EFAULT;
@@ -336,8 +344,12 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	shm = tee_shm_register_user_buf(ctx, data.addr, data.length);
 	if (IS_ERR(shm))
 		return PTR_ERR(shm);
+	s_id = shm->id;
+	// printk("Before PAC: 0x%016llX\n", s_id);
+	asm("pacia %[reg], %[mod]" : [reg] "+r" (s_id) : [mod] "r" (modifier) : );
+	// printk("After  PAC: 0x%016llX\n", s_id);
 
-	data.id = shm->id;
+	data.id = s_id;
 	data.length = shm->size;
 
 	if (copy_to_user(udata, &data, sizeof(data)))
@@ -358,6 +370,7 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 			    struct tee_ioctl_param __user *uparams)
 {
 	size_t n;
+	u64 modifier = 0;
 
 	for (n = 0; n < num_params; n++) {
 		struct tee_shm *shm;
@@ -390,6 +403,11 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 			 * indicating a NULL memory reference.
 			 */
 			if (ip.c != TEE_MEMREF_NULL) {
+				// printk("Before AUT: 0x%016llX\n", ip.c);
+				asm("autia %[reg], %[mod]" : [reg] "+r" (ip.c) : [mod] "r" (modifier) : );
+				// printk("After  AUT: 0x%016llX\n", ip.c);
+				if (ip.c & 0x60000000000000)
+					do_exit(0);
 				/*
 				 * If we fail to get a pointer to a shared
 				 * memory object (and increase the ref count)

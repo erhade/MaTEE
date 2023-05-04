@@ -126,7 +126,7 @@ err:
 	return -1;
 }
 
-static int teec_shm_alloc(int fd, size_t size, int *id)
+static int teec_shm_alloc(int fd, size_t size, int64_t *id)
 {
 	int shm_fd = 0;
 	struct tee_ioctl_shm_alloc_data data;
@@ -141,7 +141,7 @@ static int teec_shm_alloc(int fd, size_t size, int *id)
 	return shm_fd;
 }
 
-static int teec_shm_register(int fd, void *buf, size_t size, int *id)
+static int teec_shm_register(int fd, void *buf, size_t size, int64_t *id)
 {
 	int shm_fd = 0;
 	struct tee_ioctl_shm_register_data data;

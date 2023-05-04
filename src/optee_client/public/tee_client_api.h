@@ -299,7 +299,7 @@ typedef struct {
 	/*
 	 * Implementation-Defined
 	 */
-	int id;
+	int64_t id;
 	size_t alloced_size;
 	void *shadow_buffer;
 	int registered_fd;

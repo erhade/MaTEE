@@ -100,7 +100,7 @@ struct tee_ioctl_version_data {
 struct tee_ioctl_shm_alloc_data {
 	__u64 size;
 	__u32 flags;
-	__s32 id;
+	__s64 id;
 };
 
 /**
@@ -374,7 +374,7 @@ struct tee_ioctl_shm_register_data {
 	__u64 addr;
 	__u64 length;
 	__u32 flags;
-	__s32 id;
+	__s64 id;
 };
 
 /**

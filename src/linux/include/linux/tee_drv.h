@@ -213,7 +213,7 @@ struct tee_shm {
 	size_t num_pages;
 	refcount_t refcount;
 	u32 flags;
-	int id;
+	s64 id;
 	u64 sec_world_id;
 	u32 cmd;
 };
