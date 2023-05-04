@@ -66,7 +66,6 @@ static uint64_t timespec_diff_ns(struct timespec *start, struct timespec *end)
 
 static void *cancellation_thread(void *arg)
 {
-	TEEC_Result res;
 	uint64_t t;
 	double x;
 	struct timespec t0 = { };
