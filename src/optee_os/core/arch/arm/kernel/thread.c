@@ -229,7 +229,7 @@ static void __thread_alloc_and_run(uint32_t a0, uint32_t a1, uint32_t a2,
 	thread_lock_global();
 
 	for (n = 0; n < CFG_NUM_THREADS; n++) {
-		if (threads[n].pid == a4) {
+		if (threads[n].random_val == a4) {
 			threads[n].state = THREAD_STATE_ACTIVE;
 			found_thread = true;
 			break;
@@ -240,7 +240,7 @@ static void __thread_alloc_and_run(uint32_t a0, uint32_t a1, uint32_t a2,
 		for (n = 0; n < CFG_NUM_THREADS; n++) {
 			if (threads[n].state == THREAD_STATE_FREE) {
 				threads[n].state = THREAD_STATE_ACTIVE;
-				threads[n].pid = a4;
+				threads[n].random_val = a4;
 				found_thread = true;
 				break;
 			}
@@ -458,7 +458,7 @@ void thread_state_free(void)
 	threads[ct].state = THREAD_STATE_FREE;
 	threads[ct].flags = 0;
 	if (l->cmd == OPTEE_MSG_CMD_RELEASE)
-		threads[ct].pid = 0;
+		threads[ct].random_val = 0;
 	l->curr_thread = THREAD_ID_INVALID;
 
 	if (IS_ENABLED(CFG_NS_VIRTUALIZATION))

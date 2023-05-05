@@ -876,10 +876,8 @@ static int optee_smc_do_call_with_arg(struct tee_context *ctx,
 	struct optee_msg_arg *rpc_arg = NULL;
 	int rc;
 
-	pid_t pid;
 	struct task_struct *task;
 	task = get_current();
-	pid = task_pid_nr(task);
 
 	if (optee->rpc_param_count) {
 		struct optee_msg_arg *arg;
@@ -913,7 +911,7 @@ static int optee_smc_do_call_with_arg(struct tee_context *ctx,
 		reg_pair_from_64(&param.a1, &param.a2, parg);
 	}
 
-	param.a4 = pid;
+	param.a4 = task->random_value;
 	param.a5 = shm->cmd;
 
 	/* Initialize waiter */

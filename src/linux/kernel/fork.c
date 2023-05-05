@@ -97,6 +97,7 @@
 #include <linux/io_uring.h>
 #include <linux/bpf.h>
 #include <linux/stackprotector.h>
+#include <linux/random.h>
 
 #include <asm/pgalloc.h>
 #include <linux/uaccess.h>
@@ -2114,6 +2115,8 @@ static __latent_entropy struct task_struct *copy_process(
 	 * Clear TID on mm_release()?
 	 */
 	p->clear_child_tid = (clone_flags & CLONE_CHILD_CLEARTID) ? args->child_tid : NULL;
+
+	get_random_bytes(&p->random_value, sizeof(u32));
 
 	ftrace_graph_init_task(p);
 
