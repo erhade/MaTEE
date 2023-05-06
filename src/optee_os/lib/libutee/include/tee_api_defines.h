@@ -123,6 +123,7 @@
 #define TEE_ERROR_SHORT_BUFFER            0xFFFF0010
 #define TEE_ERROR_EXTERNAL_CANCEL         0xFFFF0011
 #define TEE_ERROR_TIMEOUT                 0xFFFF3001
+#define TEE_ERROR_PAC_FAIL                0xFFFF3002
 #define TEE_ERROR_OVERFLOW                0xFFFF300F
 #define TEE_ERROR_TARGET_DEAD             0xFFFF3024
 #define TEE_ERROR_STORAGE_NO_SPACE        0xFFFF3041

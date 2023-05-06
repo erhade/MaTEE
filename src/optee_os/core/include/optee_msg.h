@@ -210,6 +210,7 @@ struct optee_msg_arg {
 	uint32_t ret;
 	uint32_t ret_origin;
 	uint32_t num_params;
+	uint32_t random_val;
 
 	/* num_params tells the actual number of element in params */
 	struct optee_msg_param params[];

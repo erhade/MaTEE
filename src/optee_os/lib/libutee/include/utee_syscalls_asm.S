@@ -122,3 +122,5 @@
                      TEE_SCN_CRYP_OBJ_GENERATE_KEY, 4
 
         UTEE_SYSCALL _utee_cache_operation, TEE_SCN_CACHE_OPERATION, 3
+
+        UTEE_SYSCALL _utee_pac_instance_data, TEE_PAC_INSTANCE_DATA, 3

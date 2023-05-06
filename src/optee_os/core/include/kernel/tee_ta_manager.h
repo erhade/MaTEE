@@ -91,6 +91,8 @@ struct tee_ta_session {
 	struct condvar lock_cv;	/* CV used to wait for lock */
 	short int lock_thread;	/* Id of thread holding the lock */
 	bool unlink;		/* True if session is to be unlinked */
+	uint32_t random_val;
+	bool pac_fail;
 };
 
 /* Registered contexts */
@@ -105,7 +107,8 @@ TEE_Result tee_ta_open_session(TEE_ErrorOrigin *err,
 			       const TEE_UUID *uuid,
 			       const TEE_Identity *clnt_id,
 			       uint32_t cancel_req_to,
-			       struct tee_ta_param *param);
+			       struct tee_ta_param *param, 
+				   uint32_t random_val);
 
 TEE_Result tee_ta_invoke_command(TEE_ErrorOrigin *err,
 				 struct tee_ta_session *sess,

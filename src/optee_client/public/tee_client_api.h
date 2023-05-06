@@ -188,6 +188,7 @@ extern "C" {
 #define TEEC_ERROR_SECURITY                0xFFFF000F
 #define TEEC_ERROR_SHORT_BUFFER            0xFFFF0010
 #define TEEC_ERROR_EXTERNAL_CANCEL         0xFFFF0011
+#define TEEC_ERROR_PAC_FAIL                0xFFFF3002
 #define TEEC_ERROR_TARGET_DEAD             0xFFFF3024
 #define TEEC_ERROR_STORAGE_NO_SPACE        0xFFFF3041
 

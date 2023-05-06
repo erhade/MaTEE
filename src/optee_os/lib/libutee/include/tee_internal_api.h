@@ -115,7 +115,7 @@ TEE_Result __GP11_TEE_CheckMemoryAccessRights(uint32_t accessFlags,
 
 void TEE_SetInstanceData(const void *instanceData);
 
-const void *TEE_GetInstanceData(void);
+void *TEE_GetInstanceData(void);
 
 void *TEE_Malloc(size_t size, uint32_t hint);
 void *__GP11_TEE_Malloc(uint32_t size, uint32_t hint);

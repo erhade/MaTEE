@@ -225,4 +225,7 @@ TEE_Result _utee_cache_operation(void *va, size_t l, unsigned long op);
 
 TEE_Result _utee_gprof_send(void *buf, size_t size, uint32_t *id);
 
+TEE_Result _utee_pac_instance_data(uint32_t flag, uint32_t instance_data, 
+				  uint64_t *tee_api_instance_data);
+
 #endif /* UTEE_SYSCALLS_H */

@@ -721,7 +721,8 @@ TEE_Result tee_ta_open_session(TEE_ErrorOrigin *err,
 			       const TEE_UUID *uuid,
 			       const TEE_Identity *clnt_id,
 			       uint32_t cancel_req_to,
-			       struct tee_ta_param *param)
+			       struct tee_ta_param *param,
+				   uint32_t random_val)
 {
 	TEE_Result res = TEE_SUCCESS;
 	struct tee_ta_session *s = NULL;
@@ -735,6 +736,9 @@ TEE_Result tee_ta_open_session(TEE_ErrorOrigin *err,
 		DMSG("init session failed 0x%x", res);
 		return res;
 	}
+
+	if (s != NULL)
+		s->random_val = random_val;
 
 	if (!check_params(s, param))
 		return TEE_ERROR_BAD_PARAMETERS;
@@ -826,6 +830,13 @@ TEE_Result tee_ta_invoke_command(TEE_ErrorOrigin *err,
 
 	sess->param = NULL;
 	tee_ta_clear_busy(ta_ctx);
+
+	if (sess->pac_fail)
+	{
+		destroy_ta_ctx_from_session(sess);
+		*err = TEE_ORIGIN_TEE;
+		return TEE_ERROR_PAC_FAIL;
+	}
 
 	if (ta_ctx->panicked) {
 		destroy_ta_ctx_from_session(sess);

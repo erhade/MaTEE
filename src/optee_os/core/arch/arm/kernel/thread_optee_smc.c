@@ -142,7 +142,7 @@ static void clear_prealloc_rpc_cache(struct thread_ctx *thr)
 }
 
 static uint32_t call_entry_std(struct optee_msg_arg *arg, size_t num_params,
-			       struct optee_msg_arg *rpc_arg)
+			       struct optee_msg_arg *rpc_arg, uint32_t random_val)
 {
 	struct thread_ctx *thr = threads + thread_get_id();
 	uint32_t rv = 0;
@@ -163,6 +163,8 @@ static uint32_t call_entry_std(struct optee_msg_arg *arg, size_t num_params,
 		thr->rpc_arg = rpc_arg;
 	}
 
+	arg->random_val = random_val;
+
 	if (tee_entry_std(arg, num_params))
 		rv = OPTEE_SMC_RETURN_EBADCMD;
 	else
@@ -179,7 +181,8 @@ static uint32_t call_entry_std(struct optee_msg_arg *arg, size_t num_params,
 	return rv;
 }
 
-static uint32_t std_entry_with_parg(paddr_t parg, bool with_rpc_arg)
+static uint32_t std_entry_with_parg(paddr_t parg, bool with_rpc_arg, 
+					uint32_t random_val)
 {
 	size_t sz = sizeof(struct optee_msg_arg);
 	struct optee_msg_arg *rpc_arg = NULL;
@@ -210,7 +213,7 @@ static uint32_t std_entry_with_parg(paddr_t parg, bool with_rpc_arg)
 		if (!core_pbuf_is(CORE_MEM_NSEC_SHM, parg, sz))
 			goto bad_addr;
 
-		return call_entry_std(arg, num_params, rpc_arg);
+		return call_entry_std(arg, num_params, rpc_arg, random_val);
 	} else {
 		if (parg & SMALL_PAGE_MASK)
 			goto bad_addr;
@@ -226,7 +229,7 @@ static uint32_t std_entry_with_parg(paddr_t parg, bool with_rpc_arg)
 		else
 			rv = get_msg_arg(mobj, 0, &num_params, &arg, NULL);
 		if (!rv)
-			rv = call_entry_std(arg, num_params, rpc_arg);
+			rv = call_entry_std(arg, num_params, rpc_arg, random_val);
 		mobj_put(mobj);
 		return rv;
 	}
@@ -236,7 +239,8 @@ bad_addr:
 	return OPTEE_SMC_RETURN_EBADADDR;
 }
 
-static uint32_t std_entry_with_regd_arg(uint64_t cookie, size_t offset)
+static uint32_t std_entry_with_regd_arg(uint64_t cookie, size_t offset, 
+					uint32_t random_val)
 {
 	struct optee_msg_arg *rpc_arg = NULL;
 	struct optee_msg_arg *arg = NULL;
@@ -257,7 +261,7 @@ static uint32_t std_entry_with_regd_arg(uint64_t cookie, size_t offset)
 
 	rv = get_msg_arg(mobj, offset, &num_params, &arg, &rpc_arg);
 	if (!rv)
-		rv = call_entry_std(arg, num_params, rpc_arg);
+		rv = call_entry_std(arg, num_params, rpc_arg, random_val);
 
 	mobj_dec_map(mobj);
 out:
@@ -267,19 +271,19 @@ out:
 }
 
 static uint32_t std_smc_entry(uint32_t a0, uint32_t a1, uint32_t a2,
-			      uint32_t a3 __unused)
+			      uint32_t a3 __unused, uint32_t a4)
 {
 	const bool with_rpc_arg = true;
 
 	switch (a0) {
 	case OPTEE_SMC_CALL_WITH_ARG:
 		return std_entry_with_parg(reg_pair_to_64(a1, a2),
-					   !with_rpc_arg);
+					   !with_rpc_arg, a4);
 	case OPTEE_SMC_CALL_WITH_RPC_ARG:
 		return std_entry_with_parg(reg_pair_to_64(a1, a2),
-					   with_rpc_arg);
+					   with_rpc_arg, a4);
 	case OPTEE_SMC_CALL_WITH_REGD_ARG:
-		return std_entry_with_regd_arg(reg_pair_to_64(a1, a2), a3);
+		return std_entry_with_regd_arg(reg_pair_to_64(a1, a2), a3, a4);
 	default:
 		EMSG("Unknown SMC 0x%"PRIx32, a0);
 		return OPTEE_SMC_RETURN_EBADCMD;
@@ -293,13 +297,13 @@ static uint32_t std_smc_entry(uint32_t a0, uint32_t a1, uint32_t a2,
  * the unpaged area.
  */
 uint32_t __weak __thread_std_smc_entry(uint32_t a0, uint32_t a1, uint32_t a2,
-				       uint32_t a3, uint32_t a4 __unused,
+				       uint32_t a3, uint32_t a4,
 				       uint32_t a5 __unused)
 {
 	if (IS_ENABLED(CFG_NS_VIRTUALIZATION))
 		virt_on_stdcall();
 
-	return std_smc_entry(a0, a1, a2, a3);
+	return std_smc_entry(a0, a1, a2, a3, a4);
 }
 
 bool thread_disable_prealloc_rpc_cache(uint64_t *cookie)

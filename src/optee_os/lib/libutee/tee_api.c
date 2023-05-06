@@ -19,6 +19,9 @@
 #define TEE_NULL_SIZED_VA		((void *)1)
 #define TEE_NULL_SIZED_NO_SHARE_VA	((void *)2)
 
+#define SET_INSTANCE_DATA	0
+#define GET_INSTANCE_DATA	1
+
 /*
  * Workaround build error in Teaclave TrustZone SDK
  *
@@ -29,7 +32,7 @@ uint8_t __ta_no_share_heap[0] __weak;
 const size_t __ta_no_share_heap_size __weak;
 struct malloc_ctx *__ta_no_share_malloc_ctx __weak;
 
-static const void *tee_api_instance_data;
+static uint64_t tee_api_instance_data = 0;
 
 /* System API - Internal Client API */
 
@@ -599,12 +602,28 @@ TEE_Result __GP11_TEE_CheckMemoryAccessRights(uint32_t accessFlags,
 
 void TEE_SetInstanceData(const void *instanceData)
 {
-	tee_api_instance_data = instanceData;
+	TEE_Result res;
+	if (instanceData == NULL)
+		res = TEE_ERROR_BAD_PARAMETERS;
+
+	if (tee_api_instance_data == 0 || TEE_GetInstanceData())
+		res = _utee_pac_instance_data(SET_INSTANCE_DATA, instanceData, 
+						&tee_api_instance_data);
+
+	if (res != TEE_SUCCESS)
+		TEE_Panic(res);
 }
 
-const void *TEE_GetInstanceData(void)
+void *TEE_GetInstanceData(void)
 {
-	return tee_api_instance_data;
+	uint64_t instance_data = tee_api_instance_data;
+	TEE_Result res = _utee_pac_instance_data(GET_INSTANCE_DATA, 0, 
+						&instance_data);
+
+	if (res != TEE_SUCCESS)
+		TEE_Panic(res);
+
+	return (uint32_t)instance_data;
 }
 
 void *TEE_MemMove(void *dest, const void *src, size_t size)

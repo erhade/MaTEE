@@ -371,7 +371,7 @@ static void entry_open_session(struct optee_msg_arg *arg, uint32_t num_params)
 		goto cleanup_shm_refs;
 
 	res = tee_ta_open_session(&err_orig, &s, &tee_open_sessions, &uuid,
-				  &clnt_id, TEE_TIMEOUT_INFINITE, &param);
+				  &clnt_id, TEE_TIMEOUT_INFINITE, &param, arg->random_val);
 	if (res != TEE_SUCCESS)
 		s = NULL;
 	copy_out_param(&param, num_params - num_meta, arg->params + num_meta,

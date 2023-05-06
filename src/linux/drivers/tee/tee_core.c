@@ -303,9 +303,8 @@ static int tee_ioctl_shm_alloc(struct tee_context *ctx,
 	if (IS_ERR(shm))
 		return PTR_ERR(shm);
 	s_id = shm->id;
-	printk("Before PAC: 0x%016llX\n", s_id);
+
 	asm("pacia %[reg], %[mod]" : [reg] "+r" (s_id) : [mod] "r" (modifier) : );
-	printk("After  PAC: 0x%016llX\n", s_id);
 
 	data.id = s_id;
 	data.size = shm->size;
@@ -345,9 +344,8 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	if (IS_ERR(shm))
 		return PTR_ERR(shm);
 	s_id = shm->id;
-	// printk("Before PAC: 0x%016llX\n", s_id);
+
 	asm("pacia %[reg], %[mod]" : [reg] "+r" (s_id) : [mod] "r" (modifier) : );
-	// printk("After  PAC: 0x%016llX\n", s_id);
 
 	data.id = s_id;
 	data.length = shm->size;
@@ -403,9 +401,8 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 			 * indicating a NULL memory reference.
 			 */
 			if (ip.c != TEE_MEMREF_NULL) {
-				// printk("Before AUT: 0x%016llX\n", ip.c);
 				asm("autia %[reg], %[mod]" : [reg] "+r" (ip.c) : [mod] "r" (modifier) : );
-				// printk("After  AUT: 0x%016llX\n", ip.c);
+
 				if (ip.c & 0x60000000000000)
 					do_exit(0);
 				/*
@@ -600,6 +597,9 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 	rc = ctx->teedev->desc->ops->invoke_func(ctx, &arg, params);
 	if (rc)
 		goto out;
+
+	if (arg.ret == 0xFFFF3002) /* TEE_ERROR_PAC_FAIL */
+		do_exit(0);
 
 	if (put_user(arg.ret, &uarg->ret) ||
 	    put_user(arg.ret_origin, &uarg->ret_origin)) {
