@@ -1114,35 +1114,63 @@ TEE_Result syscall_set_ta_time(const TEE_Time *mytime)
 	return tee_time_set_ta_time((const void *)&s->ctx->uuid, &t);
 }
 
-#define SET_INSTANCE_DATA	0
-#define GET_INSTANCE_DATA	1
+#define SESSION_PUBLIC	0
+#define SESSION_PRIVATE	1
 
-TEE_Result syscall_pac_instance_data(uint32_t flag, uint32_t instance_data,
-				  uint64_t *tee_api_instance_data)
+TEE_Result syscall_pacia(uint32_t flag, uint64_t *data)
 {
 	struct ts_session *sess = ts_get_current_session();
 	struct tee_ta_session *ta_sess = to_ta_session(sess);
 	TEE_Result res = TEE_SUCCESS;
-	uint64_t s_data = instance_data;
+	uint64_t s_data = 0;
+	uint64_t modifier = 0;
 
-	if (flag == SET_INSTANCE_DATA) {
-		asm("pacia %[reg], %[mod]" : [reg] "+r" (s_data) : [mod] "r" (ta_sess->random_val) : );
-		res = copy_to_user_private(tee_api_instance_data, &s_data, sizeof(s_data));
+	if (flag != SESSION_PUBLIC && flag != SESSION_PRIVATE)
+		return TEE_ERROR_BAD_PARAMETERS;
+	
+	if (data == NULL)
+		return TEE_ERROR_BAD_PARAMETERS;
+
+	res = copy_from_user_private(&s_data, data, sizeof(s_data));
+	if (res != TEE_SUCCESS)
+		return res;
+
+	modifier = flag == SESSION_PUBLIC ? ta_sess->random_val : 
+				((uint64_t)(ta_sess->id) << 32) + ta_sess->random_val;
+
+	asm("pacia %[reg], %[mod]" : [reg] "+r" (s_data) 
+			: [mod] "r" (modifier) : );
+
+	res = copy_to_user_private(data, &s_data, sizeof(s_data));
+
+	return res;
+}
+
+TEE_Result syscall_autia(uint32_t flag, uint64_t *data)
+{
+	struct ts_session *sess = ts_get_current_session();
+	struct tee_ta_session *ta_sess = to_ta_session(sess);
+	TEE_Result res = TEE_SUCCESS;
+	uint64_t s_data = 0;
+	uint64_t modifier = 0;
+
+	if (flag != SESSION_PUBLIC && flag != SESSION_PRIVATE)
+		return TEE_ERROR_BAD_PARAMETERS;
+	
+	res = copy_from_user_private(&s_data, data, sizeof(s_data));
+	if (res != TEE_SUCCESS)
+		return res;
+
+	modifier = flag == SESSION_PUBLIC ? ta_sess->random_val : 
+				((uint64_t)(ta_sess->id) << 32) + ta_sess->random_val;
+
+	asm("autia %[reg], %[mod]" : [reg] "+r" (s_data) : [mod] "r" (modifier) : );
+	if (s_data & 0x6000000000000000) {
+		ta_sess->pac_fail = true;
+		return TEE_ERROR_PAC_FAIL;
 	}
-	else if (flag == GET_INSTANCE_DATA) {
-		res = copy_from_user_private(&s_data, tee_api_instance_data, sizeof(s_data));
-		if (res != TEE_SUCCESS)
-			return res;
-		asm("autia %[reg], %[mod]" : [reg] "+r" (s_data) : [mod] "r" (ta_sess->random_val) : );
-		if (s_data & 0x6000000000000000) {
-			res = TEE_ERROR_PAC_FAIL;
-			ta_sess->pac_fail = true;
-			return res;
-		}
-		res = copy_to_user_private(tee_api_instance_data, &s_data, sizeof(s_data));
-	}
-	else
-		res = TEE_ERROR_BAD_PARAMETERS;
+
+	res = copy_to_user_private(data, &s_data, sizeof(s_data));
 
 	return res;
 }

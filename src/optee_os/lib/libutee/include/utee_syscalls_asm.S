@@ -123,4 +123,6 @@
 
         UTEE_SYSCALL _utee_cache_operation, TEE_SCN_CACHE_OPERATION, 3
 
-        UTEE_SYSCALL _utee_pac_instance_data, TEE_PAC_INSTANCE_DATA, 3
+        UTEE_SYSCALL _utee_pacia, TEE_SCN_PACIA, 2
+
+        UTEE_SYSCALL _utee_autia, TEE_SCN_AUTIA, 2

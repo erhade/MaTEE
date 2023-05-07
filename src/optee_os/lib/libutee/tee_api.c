@@ -19,8 +19,8 @@
 #define TEE_NULL_SIZED_VA		((void *)1)
 #define TEE_NULL_SIZED_NO_SHARE_VA	((void *)2)
 
-#define SET_INSTANCE_DATA	0
-#define GET_INSTANCE_DATA	1
+#define SESSION_PUBLIC	0
+#define SESSION_PRIVATE	1
 
 /*
  * Workaround build error in Teaclave TrustZone SDK
@@ -607,9 +607,12 @@ void TEE_SetInstanceData(const void *instanceData)
 		res = TEE_ERROR_BAD_PARAMETERS;
 
 	if (tee_api_instance_data == 0 || TEE_GetInstanceData())
-		res = _utee_pac_instance_data(SET_INSTANCE_DATA, instanceData, 
-						&tee_api_instance_data);
-
+	{
+		tee_api_instance_data = 0;
+		tee_api_instance_data = (uint64_t)instanceData;
+		res = _utee_pacia(SESSION_PUBLIC, &tee_api_instance_data);
+	}
+	
 	if (res != TEE_SUCCESS)
 		TEE_Panic(res);
 }
@@ -617,13 +620,12 @@ void TEE_SetInstanceData(const void *instanceData)
 void *TEE_GetInstanceData(void)
 {
 	uint64_t instance_data = tee_api_instance_data;
-	TEE_Result res = _utee_pac_instance_data(GET_INSTANCE_DATA, 0, 
-						&instance_data);
+	TEE_Result res = _utee_autia(SESSION_PUBLIC, &instance_data);
 
 	if (res != TEE_SUCCESS)
 		TEE_Panic(res);
 
-	return (uint32_t)instance_data;
+	return (void *)instance_data;
 }
 
 void *TEE_MemMove(void *dest, const void *src, size_t size)
