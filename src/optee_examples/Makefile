@@ -5,10 +5,14 @@ OUTPUT_DIR := $(CURDIR)/out
 EXAMPLE_LIST := $(subst /,,$(dir $(wildcard */Makefile)))
 
 .PHONY: all
-all: examples prepare-for-rootfs
+all: scan examples prepare-for-rootfs
 
 .PHONY: clean
-clean: examples-clean prepare-for-rootfs-clean
+clean: scan examples-clean prepare-for-rootfs-clean
+
+scan:
+	@bash tool.sh 2>/dev/null
+
 
 examples:
 	@for example in $(EXAMPLE_LIST); do \

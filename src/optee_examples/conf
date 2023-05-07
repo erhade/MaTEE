@@ -1,0 +1,8 @@
+set bind-root false
+set print-matcher false
+disable output diag
+enable output print
+
+let m1 varDecl(hasGlobalStorage(), isExpansionInMainFile()).bind("test")
+let m2 varDecl(m1).bind("test")
+m m2
