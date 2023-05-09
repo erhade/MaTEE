@@ -327,6 +327,51 @@ static void from_utee_params(TEE_Param params[TEE_NUM_PARAMS],
 		*param_types = types;
 }
 
+static void add_invariant(uint32_t param_types,
+				  TEE_Param params[TEE_NUM_PARAMS])
+{
+	size_t n = 0;
+	TEE_Result res;
+	uint64_t s_data;
+
+	for (n = 0; n < TEE_NUM_PARAMS; n++) {
+		if (TEE_PARAM_TYPE_GET(param_types, n) == 
+			TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT) {
+			s_data = 0;
+			s_data = params[n].value.a;
+			res = _utee_pacia(params[n].value.b, &s_data);
+			if (res != TEE_SUCCESS)
+				TEE_Panic(res);
+			params[n].value.b = (uint32_t)(s_data >> 32);
+		}
+	}
+}
+
+static void check_invariant(uint32_t param_types,
+				  TEE_Param params[TEE_NUM_PARAMS])
+{
+	size_t n = 0;
+	TEE_Result res;
+	uint64_t s_data;
+	uint64_t data;
+
+	for (n = 0; n < TEE_NUM_PARAMS; n++) {
+		if (TEE_PARAM_TYPE_GET(param_types, n) == 
+			TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT) {
+			s_data = params[n].value.a + (((uint64_t)params[n].value.b) << 32);
+			data = s_data;
+			res = _utee_autia(SESSION_PUBLIC, &data);
+			if (res == TEE_ERROR_PAC_FAIL) {
+				data = s_data;
+				res = _utee_autia(SESSION_PRIVATE, &data);
+			}
+			if (res != TEE_SUCCESS)
+				TEE_Panic(res);
+			params[n].value.b = 0;
+		}
+	}
+}
+
 static TEE_Result entry_open_session(unsigned long session_id,
 			struct utee_params *up)
 {
@@ -346,8 +391,12 @@ static TEE_Result entry_open_session(unsigned long session_id,
 	from_utee_params(params, &param_types, up);
 	ta_header_save_params(param_types, params);
 
+	check_invariant(param_types, params);
+
 	res = TA_OpenSessionEntryPoint(param_types, params,
 				       &session->session_ctx);
+
+	add_invariant(param_types, params);
 
 	to_utee_params(up, param_types, params);
 
@@ -383,8 +432,12 @@ static TEE_Result entry_invoke_command(unsigned long session_id,
 	from_utee_params(params, &param_types, up);
 	ta_header_save_params(param_types, params);
 
+	check_invariant(param_types, params);
+
 	res = TA_InvokeCommandEntryPoint(session->session_ctx, cmd_id,
 					 param_types, params);
+
+	add_invariant(param_types, params);
 
 	to_utee_params(up, param_types, params);
 	return res;

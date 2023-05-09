@@ -37,7 +37,7 @@ static TEE_Result alloc_heap(uint32_t param_types, TEE_Param params[4])
 	if (!state)
 		return TEE_ERROR_OUT_OF_MEMORY;
 
-	params[0].value.a = state;
+	SET_INVARIANT_PARAMS(params[0], state, SESSION_PUBLIC);
 
 	return res;
 }

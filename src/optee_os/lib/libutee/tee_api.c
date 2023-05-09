@@ -19,9 +19,6 @@
 #define TEE_NULL_SIZED_VA		((void *)1)
 #define TEE_NULL_SIZED_NO_SHARE_VA	((void *)2)
 
-#define SESSION_PUBLIC	0
-#define SESSION_PRIVATE	1
-
 /*
  * Workaround build error in Teaclave TrustZone SDK
  *

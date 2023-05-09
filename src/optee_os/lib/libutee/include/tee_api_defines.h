@@ -92,6 +92,9 @@
 #define __OPTEE_CORE_API_COMPAT_1_1	0
 #endif
 
+#define SESSION_PUBLIC		0
+#define SESSION_PRIVATE		1
+
 #define TEE_HANDLE_NULL                   0
 
 #define TEE_TIMEOUT_INFINITE              0xFFFFFFFF
@@ -665,6 +668,10 @@
 #define TEE_PANIC_ID_TEE_BIGINTCOMPUTEFMM           0x00001C01
 #define TEE_PANIC_ID_TEE_BIGINTCONVERTFROMFMM       0x00001C02
 #define TEE_PANIC_ID_TEE_BIGINTCONVERTTOFMM         0x00001C03
+
+#define SET_INVARIANT_PARAMS(param, ptr, flag) \
+    param.value.a = ptr; \
+    param.value.b = flag
 
 /*
  * The macro TEE_PARAM_TYPES can be used to construct a value that you can

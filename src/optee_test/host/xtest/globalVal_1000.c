@@ -257,6 +257,7 @@ static void xtest_globalVal_test_3005(ADBG_Case_t *c)
 	uint32_t ret_orig = 0;
 	uint32_t shared_key32;
 	uint32_t heap_addr;
+	uint32_t heap_sign;
 
 	/* Initialize a context connecting us to the TEE */
 	res = TEEC_InitializeContext(NULL, &ctx);
@@ -281,11 +282,13 @@ static void xtest_globalVal_test_3005(ADBG_Case_t *c)
 		goto out;
 	
 	heap_addr = op.params[0].value.a;
+	heap_sign = op.params[0].value.b;
 
 	/* 2. Register the shared key */
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT,
 					 TEEC_MEMREF_TEMP_INPUT, TEEC_NONE, TEEC_NONE);
 	op.params[0].value.a = heap_addr;
+	op.params[0].value.b = heap_sign;
 	op.params[1].tmpref.buffer = K;
 	op.params[1].tmpref.size = sizeof(K);
 
@@ -297,6 +300,7 @@ static void xtest_globalVal_test_3005(ADBG_Case_t *c)
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT, TEEC_VALUE_OUTPUT,
 					 TEEC_NONE, TEEC_NONE);
 	op.params[0].value.a = heap_addr;
+	op.params[0].value.b = heap_sign;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, TEEC_InvokeCommand(
 		&session, TA_HEAP_PARAM_PAC_CMD_READ_HEAP, &op, &ret_orig)))
@@ -308,6 +312,7 @@ static void xtest_globalVal_test_3005(ADBG_Case_t *c)
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT,
 					 TEEC_NONE, TEEC_NONE, TEEC_NONE);
 	op.params[0].value.a = heap_addr;
+	op.params[0].value.b = heap_sign;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, TEEC_InvokeCommand(
 		&session, TA_HEAP_PARAM_PAC_CMD_RELEASE_HEAP, &op, &ret_orig)))
