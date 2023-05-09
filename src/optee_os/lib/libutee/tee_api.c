@@ -331,6 +331,11 @@ TEE_Result TEE_OpenTASession(const TEE_UUID *destination,
 	void *tmp_buf = NULL;
 	size_t tmp_len = 0;
 	void *tmp_va[TEE_NUM_PARAMS] = { NULL };
+	uint32_t flag = SESSION_PUBLIC;
+	uint64_t s_data = 0;
+
+	if (session && *session == (TEE_TASessionHandle) SESSION_PRIVATE)
+		flag = SESSION_PRIVATE;
 
 	if (paramTypes) {
 		__utee_check_inout_annotation(params,
@@ -360,10 +365,18 @@ out:
 	 * TEE_SUCCESS isn't returned. Set it here explicitly in case
 	 * the syscall fails before out parameters has been updated.
 	 */
-	if (res != TEE_SUCCESS)
+	if (res != TEE_SUCCESS) {
 		s = TEE_HANDLE_NULL;
+		*session = (TEE_TASessionHandle)(uintptr_t)s;
+	}
+	else {
+		*session = (TEE_TASessionHandle)(uintptr_t)s;
+		s_data = (uint64_t) *session;
+		res = _utee_pacia(flag, &s_data);
+		if (res == TEE_SUCCESS)
+			*session = (TEE_TASessionHandle) s_data;
+	}
 
-	*session = (TEE_TASessionHandle)(uintptr_t)s;
 	return res;
 }
 
@@ -380,6 +393,11 @@ TEE_Result __GP11_TEE_OpenTASession(const TEE_UUID *destination,
 	void *tmp_buf = NULL;
 	size_t tmp_len = 0;
 	void *tmp_va[TEE_NUM_PARAMS] = { NULL };
+	uint32_t flag = SESSION_PUBLIC;
+	uint64_t s_data = 0;
+
+	if (session && *session == (TEE_TASessionHandle) SESSION_PRIVATE)
+		flag = SESSION_PRIVATE;
 
 	if (paramTypes)
 		__utee_check_inout_annotation(params,
@@ -407,17 +425,37 @@ out:
 	 * TEE_SUCCESS isn't returned. Set it here explicitly in case
 	 * the syscall fails before out parameters has been updated.
 	 */
-	if (res != TEE_SUCCESS)
+	if (res != TEE_SUCCESS) {
 		s = TEE_HANDLE_NULL;
+		*session = (TEE_TASessionHandle)(uintptr_t)s;
+	}
+	else {
+		*session = (TEE_TASessionHandle)(uintptr_t)s;
+		s_data = (uint64_t) *session;
+		res = _utee_pacia(flag, &s_data);
+		if (res == TEE_SUCCESS)
+			*session = (TEE_TASessionHandle) s_data;
+	}
 
-	*session = (TEE_TASessionHandle)(uintptr_t)s;
 	return res;
 }
 
 void TEE_CloseTASession(TEE_TASessionHandle session)
 {
+	TEE_Result res = TEE_SUCCESS;
+	uint64_t s_data = (uint64_t) session;
+	uint64_t data = s_data;
 	if (session != TEE_HANDLE_NULL) {
-		TEE_Result res = _utee_close_ta_session((uintptr_t)session);
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		session = (TEE_TASessionHandle)data;
+
+		res = _utee_close_ta_session((uintptr_t)session);
 
 		if (res != TEE_SUCCESS)
 			TEE_Panic(res);
@@ -436,6 +474,20 @@ TEE_Result TEE_InvokeTACommand(TEE_TASessionHandle session,
 	void *tmp_buf = NULL;
 	size_t tmp_len = 0;
 	void *tmp_va[TEE_NUM_PARAMS] = { NULL };
+	uint64_t s_data = (uint64_t) session;
+	uint64_t data = s_data;
+
+	if (session != TEE_HANDLE_NULL)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		session = (TEE_TASessionHandle)data;
+	}
 
 	if (paramTypes) {
 		__utee_check_inout_annotation(params,
@@ -489,6 +541,20 @@ TEE_Result __GP11_TEE_InvokeTACommand(TEE_TASessionHandle session,
 	void *tmp_buf = NULL;
 	size_t tmp_len = 0;
 	void *tmp_va[TEE_NUM_PARAMS] = { NULL };
+	uint64_t s_data = (uint64_t) session;
+	uint64_t data = s_data;
+
+	if (session != TEE_HANDLE_NULL)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		session = (TEE_TASessionHandle)data;
+	}
 
 	if (paramTypes)
 		__utee_check_inout_annotation(params,
