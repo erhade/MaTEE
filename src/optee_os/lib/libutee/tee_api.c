@@ -48,6 +48,7 @@ static void copy_param(struct utee_params *up, uint32_t param_types,
 		switch (TEE_PARAM_TYPE_GET(up->types, n)) {
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
 			a = params[n].value.a;
 			b = params[n].value.b;
 			break;
@@ -78,6 +79,7 @@ static void copy_gp11_param(struct utee_params *up, uint32_t param_types,
 		switch (TEE_PARAM_TYPE_GET(up->types, n)) {
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
 			a = params[n].value.a;
 			b = params[n].value.b;
 			break;
@@ -191,6 +193,7 @@ static void update_out_param(TEE_Param params[TEE_NUM_PARAMS],
 		switch (TEE_PARAM_TYPE_GET(types, n)) {
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			params[n].value.a = a;
 			params[n].value.b = b;
 			break;
@@ -221,6 +224,7 @@ static void update_out_gp11_param(__GP11_TEE_Param params[TEE_NUM_PARAMS],
 		switch (TEE_PARAM_TYPE_GET(types, n)) {
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			params[n].value.a = a;
 			params[n].value.b = b;
 			break;

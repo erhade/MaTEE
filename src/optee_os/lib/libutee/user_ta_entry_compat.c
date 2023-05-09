@@ -16,6 +16,8 @@ static void to_gp11_param(uint32_t pt, const TEE_Param params[TEE_NUM_PARAMS],
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			gp11_params[n].value.a = params[n].value.a;
 			gp11_params[n].value.b = params[n].value.b;
 			break;
@@ -42,6 +44,8 @@ static void from_gp11_param(uint32_t pt,
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			params[n].value.a = gp11_params[n].value.a;
 			params[n].value.b = gp11_params[n].value.b;
 			break;

@@ -68,6 +68,7 @@ static void init_utee_param(struct utee_params *up,
 			break;
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
 			a = p->u[n].val.a;
 			b = p->u[n].val.b;
 			break;
@@ -96,6 +97,7 @@ static void update_from_utee_param(struct tee_ta_param *p,
 			break;
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			/* See comment for struct utee_params in utee_types.h */
 			p->u[n].val.a = up->vals[n * 2];
 			p->u[n].val.b = up->vals[n * 2 + 1];

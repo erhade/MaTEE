@@ -361,6 +361,7 @@ int optee_supp_send(struct tee_context *ctx, u32 ret, u32 num_params,
 		switch (p->attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK) {
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			p->u.value.a = param[n + num_meta].u.value.a;
 			p->u.value.b = param[n + num_meta].u.value.b;
 			p->u.value.c = param[n + num_meta].u.value.c;

@@ -150,6 +150,9 @@ struct tee_ioctl_buf_data {
 #define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT	6
 #define TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT	7	/* input and output */
 
+#define TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_INPUT			4
+#define TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT		8
+
 /*
  * Mask for the type part of the attribute, leaves room for more types
  */

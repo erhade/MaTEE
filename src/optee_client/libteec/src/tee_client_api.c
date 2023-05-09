@@ -358,6 +358,8 @@ static TEEC_Result teec_pre_process_operation(TEEC_Context *ctx,
 		case TEEC_VALUE_INPUT:
 		case TEEC_VALUE_OUTPUT:
 		case TEEC_VALUE_INOUT:
+		case TEEC_INVARIANT_VALUE_INPUT:
+		case TEEC_INVARIANT_VALUE_OUTPUT:
 			params[n].attr = param_type;
 			params[n].a = operation->params[n].value.a;
 			params[n].b = operation->params[n].value.b;
@@ -464,9 +466,11 @@ static void teec_post_process_operation(TEEC_Operation *operation,
 		param_type = TEEC_PARAM_TYPE_GET(operation->paramTypes, n);
 		switch (param_type) {
 		case TEEC_VALUE_INPUT:
+		case TEEC_INVARIANT_VALUE_INPUT:
 			break;
 		case TEEC_VALUE_OUTPUT:
 		case TEEC_VALUE_INOUT:
+		case TEEC_INVARIANT_VALUE_OUTPUT:
 			operation->params[n].value.a = params[n].a;
 			operation->params[n].value.b = params[n].b;
 			break;

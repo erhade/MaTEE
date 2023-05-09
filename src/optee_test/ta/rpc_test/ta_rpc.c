@@ -41,6 +41,7 @@ static TEE_Result rpc_call_cryp(bool sec_mem, uint32_t nParamTypes,
 			switch (TEE_PARAM_TYPE_GET(types, n)) {
 			case TEE_PARAM_TYPE_VALUE_INPUT:
 			case TEE_PARAM_TYPE_VALUE_INOUT:
+			case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
 				params[n].value = pParams[n].value;
 				break;
 
@@ -80,6 +81,7 @@ static TEE_Result rpc_call_cryp(bool sec_mem, uint32_t nParamTypes,
 			switch (TEE_PARAM_TYPE_GET(types, n)) {
 			case TEE_PARAM_TYPE_VALUE_INOUT:
 			case TEE_PARAM_TYPE_VALUE_OUTPUT:
+			case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 				pParams[n].value = params[n].value;
 				break;
 

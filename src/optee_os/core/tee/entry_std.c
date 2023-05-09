@@ -199,6 +199,8 @@ static TEE_Result copy_in_params(const struct optee_msg_param *params,
 		case OPTEE_MSG_ATTR_TYPE_VALUE_INPUT:
 		case OPTEE_MSG_ATTR_TYPE_VALUE_OUTPUT:
 		case OPTEE_MSG_ATTR_TYPE_VALUE_INOUT:
+		case OPTEE_MSG_ATTR_TYPE_INVARIANT_VALUE_INPUT:
+		case OPTEE_MSG_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			pt[n] = TEE_PARAM_TYPE_VALUE_INPUT + attr -
 				OPTEE_MSG_ATTR_TYPE_VALUE_INPUT;
 			ta_param->u[n].val.a = READ_ONCE(params[n].u.value.a);
@@ -296,6 +298,7 @@ static void copy_out_param(struct tee_ta_param *ta_param, uint32_t num_params,
 			break;
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			params[n].u.value.a = ta_param->u[n].val.a;
 			params[n].u.value.b = ta_param->u[n].val.b;
 			break;

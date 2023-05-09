@@ -273,6 +273,8 @@ static void to_utee_params(struct utee_params *up, uint32_t param_types,
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			up->vals[n * 2] = params[n].value.a;
 			up->vals[n * 2 + 1] = params[n].value.b;
 			break;
@@ -305,6 +307,8 @@ static void from_utee_params(TEE_Param params[TEE_NUM_PARAMS],
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			params[n].value.a = a;
 			params[n].value.b = b;
 			break;

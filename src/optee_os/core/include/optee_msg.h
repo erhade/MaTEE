@@ -22,9 +22,11 @@
 #define OPTEE_MSG_ATTR_TYPE_VALUE_INPUT		U(0x1)
 #define OPTEE_MSG_ATTR_TYPE_VALUE_OUTPUT	U(0x2)
 #define OPTEE_MSG_ATTR_TYPE_VALUE_INOUT		U(0x3)
+#define OPTEE_MSG_ATTR_TYPE_INVARIANT_VALUE_INPUT		U(0x4)
 #define OPTEE_MSG_ATTR_TYPE_RMEM_INPUT		U(0x5)
 #define OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT		U(0x6)
 #define OPTEE_MSG_ATTR_TYPE_RMEM_INOUT		U(0x7)
+#define OPTEE_MSG_ATTR_TYPE_INVARIANT_VALUE_OUTPUT		U(0x8)
 #define OPTEE_MSG_ATTR_TYPE_FMEM_INPUT		OPTEE_MSG_ATTR_TYPE_RMEM_INPUT
 #define OPTEE_MSG_ATTR_TYPE_FMEM_OUTPUT		OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT
 #define OPTEE_MSG_ATTR_TYPE_FMEM_INOUT		OPTEE_MSG_ATTR_TYPE_RMEM_INOUT
@@ -211,6 +213,7 @@ struct optee_msg_arg {
 	uint32_t ret_origin;
 	uint32_t num_params;
 	uint32_t random_val;
+	bool is_invariant_data[4];
 
 	/* num_params tells the actual number of element in params */
 	struct optee_msg_param params[];

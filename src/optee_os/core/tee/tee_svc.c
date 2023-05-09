@@ -621,6 +621,7 @@ static TEE_Result utee_param_to_param(struct user_ta_ctx *utc,
 			break;
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
 			p->u[n].val.a = a;
 			p->u[n].val.b = b;
 			break;
@@ -850,6 +851,7 @@ static TEE_Result tee_svc_update_out_param(
 
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			vals[n * 2] = param->u[n].val.a;
 			vals[n * 2 + 1] = param->u[n].val.b;
 			break;

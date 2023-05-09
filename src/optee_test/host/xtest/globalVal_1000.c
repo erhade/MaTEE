@@ -294,7 +294,7 @@ static void xtest_globalVal_test_3005(ADBG_Case_t *c)
 		goto out;
 
 	/* 3. Get 32 bits of the shared key */
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INOUT, TEEC_NONE,
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT, TEEC_VALUE_OUTPUT,
 					 TEEC_NONE, TEEC_NONE);
 	op.params[0].value.a = heap_addr;
 
@@ -302,7 +302,7 @@ static void xtest_globalVal_test_3005(ADBG_Case_t *c)
 		&session, TA_HEAP_PARAM_PAC_CMD_READ_HEAP, &op, &ret_orig)))
 		goto out;
 
-	shared_key32 = op.params[0].value.a;
+	shared_key32 = op.params[1].value.a;
 
 	/* 4. Release the heap */
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT,

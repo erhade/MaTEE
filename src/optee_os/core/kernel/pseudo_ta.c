@@ -66,6 +66,8 @@ static TEE_Result copy_in_param(struct ts_session *s __maybe_unused,
 		case TEE_PARAM_TYPE_VALUE_INPUT:
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			tee_param[n].value.a = param->u[n].val.a;
 			tee_param[n].value.b = param->u[n].val.b;
 			break;
@@ -110,6 +112,7 @@ static void update_out_param(TEE_Param tee_param[TEE_NUM_PARAMS],
 		switch (TEE_PARAM_TYPE_GET(param->types, n)) {
 		case TEE_PARAM_TYPE_VALUE_OUTPUT:
 		case TEE_PARAM_TYPE_VALUE_INOUT:
+		case TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT:
 			param->u[n].val.a = tee_param[n].value.a;
 			param->u[n].val.b = tee_param[n].value.b;
 			break;

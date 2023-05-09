@@ -158,6 +158,8 @@ static int get_value(size_t num_params, struct tee_ioctl_param *params,
 	case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
 	case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
 	case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+	case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_INPUT:
+	case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 		*value = (void *)&params[idx].a;
 		return 0;
 	default:
@@ -927,6 +929,8 @@ bool tee_supp_param_is_value(struct tee_ioctl_param *param)
 	case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
 	case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
 	case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+	case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_INPUT:
+	case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 		return true;
 	default:
 		return false;

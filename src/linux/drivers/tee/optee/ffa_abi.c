@@ -171,6 +171,8 @@ static int optee_ffa_from_msg_param(struct optee *optee,
 		case OPTEE_MSG_ATTR_TYPE_VALUE_INPUT:
 		case OPTEE_MSG_ATTR_TYPE_VALUE_OUTPUT:
 		case OPTEE_MSG_ATTR_TYPE_VALUE_INOUT:
+		case OPTEE_MSG_ATTR_TYPE_INVARIANT_VALUE_INPUT:
+		case OPTEE_MSG_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			optee_from_msg_param_value(p, attr, mp);
 			break;
 		case OPTEE_MSG_ATTR_TYPE_FMEM_INPUT:
@@ -243,6 +245,8 @@ static int optee_ffa_to_msg_param(struct optee *optee,
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_INPUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			optee_to_msg_param_value(mp, p);
 			break;
 		case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT:

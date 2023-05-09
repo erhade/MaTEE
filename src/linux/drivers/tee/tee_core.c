@@ -385,9 +385,11 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 		switch (ip.attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK) {
 		case TEE_IOCTL_PARAM_ATTR_TYPE_NONE:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			break;
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_INPUT:
 			params[n].u.value.a = ip.a;
 			params[n].u.value.b = ip.b;
 			params[n].u.value.c = ip.c;
@@ -459,6 +461,7 @@ static int params_to_user(struct tee_ioctl_param __user *uparams,
 		switch (p->attr) {
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			if (put_user(p->u.value.a, &up->a) ||
 			    put_user(p->u.value.b, &up->b) ||
 			    put_user(p->u.value.c, &up->c))
@@ -663,6 +666,7 @@ static int params_to_supp(struct tee_context *ctx,
 		switch (p->attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK) {
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_INPUT:
 			ip.a = p->u.value.a;
 			ip.b = p->u.value.b;
 			ip.c = p->u.value.c;
@@ -764,6 +768,7 @@ static int params_from_supp(struct tee_param *params, size_t num_params,
 		switch (ip.attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK) {
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+		case TEE_IOCTL_PARAM_ATTR_TYPE_INVARIANT_VALUE_OUTPUT:
 			/* Only out and in/out values can be updated */
 			p->u.value.a = ip.a;
 			p->u.value.b = ip.b;
