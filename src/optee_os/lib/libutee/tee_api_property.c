@@ -207,6 +207,23 @@ TEE_Result TEE_GetPropertyAsString(TEE_PropSetHandle propsetOrEnumerator,
 	uint32_t uint32_val;
 	bool bool_val;
 	TEE_Identity *p_identity_val;
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -317,6 +334,23 @@ TEE_Result TEE_GetPropertyAsBool(TEE_PropSetHandle propsetOrEnumerator,
 	TEE_Result res;
 	enum user_ta_prop_type type;
 	uint32_t bool_len = sizeof(bool);
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -345,6 +379,23 @@ TEE_Result TEE_GetPropertyAsU32(TEE_PropSetHandle propsetOrEnumerator,
 	TEE_Result res;
 	enum user_ta_prop_type type;
 	uint32_t uint32_len = sizeof(uint32_t);
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -370,6 +421,23 @@ TEE_Result TEE_GetPropertyAsU64(TEE_PropSetHandle propsetOrEnumerator,
 	TEE_Result res;
 	enum user_ta_prop_type type;
 	uint32_t uint64_len = sizeof(*value);
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -396,6 +464,23 @@ __GP11_TEE_GetPropertyAsBinaryBlock(TEE_PropSetHandle propsetOrEnumerator,
 {
 	TEE_Result res = TEE_SUCCESS;
 	enum user_ta_prop_type type = USER_TA_PROP_TYPE_BOOL;
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -437,6 +522,23 @@ TEE_Result TEE_GetPropertyAsUUID(TEE_PropSetHandle propsetOrEnumerator,
 	TEE_Result res;
 	enum user_ta_prop_type type;
 	uint32_t uuid_len = sizeof(TEE_UUID);
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -462,6 +564,23 @@ TEE_Result TEE_GetPropertyAsIdentity(TEE_PropSetHandle propsetOrEnumerator,
 	TEE_Result res;
 	enum user_ta_prop_type type;
 	uint32_t identity_len = sizeof(TEE_Identity);
+	uint64_t s_data = (uint64_t) propsetOrEnumerator;
+	uint64_t data = s_data;
+
+	if (propsetOrEnumerator != TEE_HANDLE_NULL 
+		&& propsetOrEnumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& propsetOrEnumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		propsetOrEnumerator = (TEE_PropSetHandle) data;
+	}
 
 	if (is_propset_pseudo_handle(propsetOrEnumerator))
 		__utee_check_instring_annotation(name);
@@ -485,6 +604,11 @@ TEE_Result TEE_AllocatePropertyEnumerator(TEE_PropSetHandle *enumerator)
 {
 	TEE_Result res;
 	struct prop_enumerator *pe;
+	uint32_t flag = SESSION_PUBLIC;
+	uint64_t s_data = 0;
+
+	if (enumerator && *enumerator == (TEE_PropSetHandle) SESSION_PRIVATE)
+		flag = SESSION_PRIVATE;
 
 	__utee_check_out_annotation(enumerator, sizeof(*enumerator));
 
@@ -496,6 +620,12 @@ TEE_Result TEE_AllocatePropertyEnumerator(TEE_PropSetHandle *enumerator)
 	}
 
 	*enumerator = (TEE_PropSetHandle) pe;
+
+	s_data = (uint64_t) *enumerator;
+	res = _utee_pacia(flag, &s_data);
+	if (res == TEE_SUCCESS)
+		*enumerator = (TEE_PropSetHandle) s_data;
+
 	TEE_ResetPropertyEnumerator(*enumerator);
 
 	goto out;
@@ -510,39 +640,116 @@ out:
 
 void TEE_ResetPropertyEnumerator(TEE_PropSetHandle enumerator)
 {
-	struct prop_enumerator *pe = (struct prop_enumerator *)enumerator;
+	uint64_t s_data = (uint64_t) enumerator;
+	uint64_t data = s_data;
+	TEE_Result res;
+	struct prop_enumerator *pe;
 
-	pe->idx = PROP_ENUMERATOR_NOT_STARTED;
+	if (enumerator != TEE_HANDLE_NULL 
+		&& enumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& enumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& enumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		enumerator = (TEE_PropSetHandle) data;
+		pe = (struct prop_enumerator *)enumerator;
+
+		pe->idx = PROP_ENUMERATOR_NOT_STARTED;
+	}
 }
 
 void TEE_FreePropertyEnumerator(TEE_PropSetHandle enumerator)
 {
-	struct prop_enumerator *pe = (struct prop_enumerator *)enumerator;
+	uint64_t s_data = (uint64_t) enumerator;
+	uint64_t data = s_data;
+	TEE_Result res;
+	struct prop_enumerator *pe;
 
-	TEE_Free(pe);
+	if (enumerator != TEE_HANDLE_NULL 
+		&& enumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& enumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& enumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		enumerator = (TEE_PropSetHandle) data;
+		pe = (struct prop_enumerator *)enumerator;
+
+		TEE_Free(pe);
+	}
 }
 
 void TEE_StartPropertyEnumerator(TEE_PropSetHandle enumerator,
 				 TEE_PropSetHandle propSet)
 {
-	struct prop_enumerator *pe = (struct prop_enumerator *)enumerator;
+	uint64_t s_data = (uint64_t) enumerator;
+	uint64_t data = s_data;
+	TEE_Result res;
+	struct prop_enumerator *pe;
+	if (enumerator != TEE_HANDLE_NULL 
+		&& enumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& enumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& enumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
 
-	if (!pe)
-		return;
+		enumerator = (TEE_PropSetHandle) data;
 
-	pe->idx = 0;
-	pe->prop_set = propSet;
+		pe = (struct prop_enumerator *)enumerator;
+
+		if (!pe)
+			return;
+
+		pe->idx = 0;
+		pe->prop_set = propSet;
+	}
 }
 
 TEE_Result __GP11_TEE_GetPropertyName(TEE_PropSetHandle enumerator,
 				      void *name, uint32_t *name_len)
 {
 	TEE_Result res;
-	struct prop_enumerator *pe = (struct prop_enumerator *)enumerator;
+	struct prop_enumerator *pe;
 	const struct user_ta_property *eps;
 	size_t eps_len;
 	const char *str;
 	size_t bufferlen;
+	uint64_t s_data = (uint64_t) enumerator;
+	uint64_t data = s_data;
+
+	if (enumerator != TEE_HANDLE_NULL 
+		&& enumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& enumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& enumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		enumerator = (TEE_PropSetHandle) data;
+	}
+
+	pe = (struct prop_enumerator *)enumerator;
 
 	if (!pe) {
 		res = TEE_ERROR_BAD_PARAMETERS;
@@ -593,10 +800,29 @@ TEE_Result TEE_GetPropertyName(TEE_PropSetHandle enumerator,
 TEE_Result TEE_GetNextProperty(TEE_PropSetHandle enumerator)
 {
 	TEE_Result res;
-	struct prop_enumerator *pe = (struct prop_enumerator *)enumerator;
+	struct prop_enumerator *pe;
 	uint32_t next_idx;
 	const struct user_ta_property *eps;
 	size_t eps_len;
+
+	uint64_t s_data = (uint64_t) enumerator;
+	uint64_t data = s_data;
+
+	if (enumerator != TEE_HANDLE_NULL 
+		&& enumerator != TEE_PROPSET_TEE_IMPLEMENTATION 
+		&& enumerator != TEE_PROPSET_CURRENT_CLIENT 
+		&& enumerator != TEE_PROPSET_CURRENT_TA)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		enumerator = (TEE_PropSetHandle) data;
+	}
+	pe = (struct prop_enumerator *)enumerator;
 
 	if (!pe) {
 		res = TEE_ERROR_BAD_PARAMETERS;
