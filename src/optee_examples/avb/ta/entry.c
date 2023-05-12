@@ -135,7 +135,7 @@ static TEE_Result write_rb_idx(uint32_t pt, TEE_Param params[TEE_NUM_PARAMS])
 	uint64_t idx;
 	size_t count;
 	TEE_Result res;
-	TEE_ObjectHandle h;
+	TEE_ObjectHandle h = TEE_HANDLE_NULL;
 	if (pt != exp_pt)
 		return TEE_ERROR_BAD_PARAMETERS;
 

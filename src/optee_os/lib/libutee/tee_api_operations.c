@@ -33,6 +33,8 @@ struct __TEE_OperationHandle {
 	uint32_t state;		/* Handle to state in TEE Core */
 };
 
+void check_object(TEE_ObjectHandle *object);
+
 /* Cryptographic Operations API - Generic Operation Functions */
 
 TEE_Result TEE_AllocateOperation(TEE_OperationHandle *operation,
@@ -801,7 +803,9 @@ out:
 TEE_Result TEE_SetOperationKey2(TEE_OperationHandle operation,
 				TEE_ObjectHandle key1, TEE_ObjectHandle key2)
 {
-	if (operation != TEE_HANDLE_NULL && key1 && key1 == key2)
+	uint64_t mask = 0xFFFFFFFF;
+
+	if (operation != TEE_HANDLE_NULL && key1 && ((uint64_t)key1 & mask) == ((uint64_t)key2 & mask))
 		return TEE_ERROR_SECURITY;
 
 	return set_operation_key2(operation, key1, key2);
@@ -2307,6 +2311,7 @@ void TEE_DeriveKey(TEE_OperationHandle operation,
 	struct utee_attribute ua[paramCount];
 	struct utee_object_info key_info = { };
 	TEE_Result res = TEE_SUCCESS;
+	check_object(&derivedKey);
 
 	if (operation == TEE_HANDLE_NULL || derivedKey == 0)
 		TEE_Panic(0);
@@ -2349,6 +2354,7 @@ void __GP11_TEE_DeriveKey(TEE_OperationHandle operation,
 	struct utee_attribute ua[paramCount];
 	struct utee_object_info key_info = { };
 	TEE_Result res = TEE_SUCCESS;
+	check_object(&derivedKey);
 
 	if (operation == TEE_HANDLE_NULL || derivedKey == 0)
 		TEE_Panic(0);
