@@ -315,12 +315,14 @@ TEE_Result ta_storage_cmd_alloc_enum(uint32_t param_types, TEE_Param params[4])
 
 	res = TEE_AllocatePersistentObjectEnumerator(&oe);
 	params[0].value.a = (uintptr_t)oe;
+	params[0].value.b = (uintptr_t)oe >> 32;
 	return res;
 }
 
 TEE_Result ta_storage_cmd_free_enum(uint32_t param_types, TEE_Param params[4])
 {
-	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a);
+	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a 
+						| ((uint64_t) params[0].value.b << 32));
 
 	ASSERT_PARAM_TYPE(TEE_PARAM_TYPES
 			  (TEE_PARAM_TYPE_VALUE_INPUT, TEE_PARAM_TYPE_NONE,
@@ -332,7 +334,8 @@ TEE_Result ta_storage_cmd_free_enum(uint32_t param_types, TEE_Param params[4])
 
 TEE_Result ta_storage_cmd_reset_enum(uint32_t param_types, TEE_Param params[4])
 {
-	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a);
+	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a 
+						| ((uint64_t) params[0].value.b << 32));
 
 	ASSERT_PARAM_TYPE(TEE_PARAM_TYPES
 			  (TEE_PARAM_TYPE_VALUE_INPUT, TEE_PARAM_TYPE_NONE,
@@ -344,18 +347,21 @@ TEE_Result ta_storage_cmd_reset_enum(uint32_t param_types, TEE_Param params[4])
 
 TEE_Result ta_storage_cmd_start_enum(uint32_t param_types, TEE_Param params[4])
 {
-	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a);
+	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a 
+						| ((uint64_t) params[0].value.b << 32));
 
 	ASSERT_PARAM_TYPE(TEE_PARAM_TYPES
-			  (TEE_PARAM_TYPE_VALUE_INPUT, TEE_PARAM_TYPE_NONE,
+			  (TEE_PARAM_TYPE_VALUE_INPUT, TEE_PARAM_TYPE_VALUE_INPUT,
 			   TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE));
 
-	return TEE_StartPersistentObjectEnumerator(oe, params[0].value.b);
+	return TEE_StartPersistentObjectEnumerator(oe, params[1].value.b);
 }
 
 TEE_Result ta_storage_cmd_next_enum(uint32_t param_types, TEE_Param params[4])
 {
-	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a);
+	TEE_ObjectEnumHandle oe = VAL2HANDLE(params[0].value.a 
+						| ((uint64_t) params[0].value.b << 32));
+
 	TEE_Result res = TEE_SUCCESS;
 	TEE_ObjectInfo *obj = NULL;
 	void *b2 = NULL;

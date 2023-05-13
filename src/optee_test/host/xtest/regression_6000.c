@@ -272,7 +272,7 @@ static TEEC_Result fs_rename(TEEC_Session *sess, uint64_t obj, void *id,
 	return TEEC_InvokeCommand(sess, TA_STORAGE_CMD_RENAME, &op, &org);
 }
 
-static TEEC_Result fs_alloc_enum(TEEC_Session *sess, uint32_t *e)
+static TEEC_Result fs_alloc_enum(TEEC_Session *sess, uint64_t *e)
 {
 	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
@@ -284,12 +284,12 @@ static TEEC_Result fs_alloc_enum(TEEC_Session *sess, uint32_t *e)
 	res = TEEC_InvokeCommand(sess, TA_STORAGE_CMD_ALLOC_ENUM, &op, &org);
 
 	if (res == TEEC_SUCCESS)
-		*e = op.params[0].value.a;
+		*e = ((uintptr_t) op.params[0].value.b << 32) | op.params[0].value.a;
 
 	return res;
 }
 
-static TEEC_Result fs_reset_enum(TEEC_Session *sess, uint32_t e)
+static TEEC_Result fs_reset_enum(TEEC_Session *sess, uint64_t e)
 {
 	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
@@ -299,12 +299,13 @@ static TEEC_Result fs_reset_enum(TEEC_Session *sess, uint32_t e)
 					 TEEC_NONE, TEEC_NONE);
 
 	op.params[0].value.a = e;
+	op.params[0].value.b = e >> 32;
 	res = TEEC_InvokeCommand(sess, TA_STORAGE_CMD_RESET_ENUM, &op, &org);
 
 	return res;
 }
 
-static TEEC_Result fs_free_enum(TEEC_Session *sess, uint32_t e)
+static TEEC_Result fs_free_enum(TEEC_Session *sess, uint64_t e)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 	uint32_t org = 0;
@@ -313,26 +314,28 @@ static TEEC_Result fs_free_enum(TEEC_Session *sess, uint32_t e)
 					 TEEC_NONE);
 
 	op.params[0].value.a = e;
+	op.params[0].value.b = e >> 32;
 
 	return TEEC_InvokeCommand(sess, TA_STORAGE_CMD_FREE_ENUM, &op, &org);
 }
 
-static TEEC_Result fs_start_enum(TEEC_Session *sess, uint32_t e,
+static TEEC_Result fs_start_enum(TEEC_Session *sess, uint64_t e,
 				 uint32_t storage_id)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 	uint32_t org = 0;
 
-	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_NONE,
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_VALUE_INPUT,
 					 TEEC_NONE, TEEC_NONE);
 
 	op.params[0].value.a = e;
-	op.params[0].value.b = storage_id;
+	op.params[0].value.b = e >> 32;
+	op.params[1].value.b = storage_id;
 
 	return TEEC_InvokeCommand(sess, TA_STORAGE_CMD_START_ENUM, &op, &org);
 }
 
-static TEEC_Result fs_next_enum(TEEC_Session *sess, uint32_t e, void *obj_info,
+static TEEC_Result fs_next_enum(TEEC_Session *sess, uint64_t e, void *obj_info,
 				size_t info_size, void *id, uint32_t id_size)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
@@ -344,6 +347,7 @@ static TEEC_Result fs_next_enum(TEEC_Session *sess, uint32_t e, void *obj_info,
 		op.paramTypes |= (TEEC_MEMREF_TEMP_OUTPUT << 4);
 
 	op.params[0].value.a = e;
+	op.params[0].value.b = e >> 32;
 	op.params[1].tmpref.buffer = obj_info;
 	op.params[1].tmpref.size = info_size;
 	op.params[2].tmpref.buffer = id;
@@ -1228,7 +1232,7 @@ static void xtest_tee_test_6009_single(ADBG_Case_t *c, uint32_t storage_id)
 	uint64_t obj0 = 0;
 	uint64_t obj1 = 0;
 	uint64_t obj2 = 0;
-	uint32_t e = 0;
+	uint64_t e = 0;
 	uint8_t info[200] = { };
 	uint8_t id[200] = { };
 	uint32_t orig = 0;
@@ -1335,7 +1339,7 @@ static void xtest_tee_test_6010_single(ADBG_Case_t *c, uint32_t storage_id)
 	uint32_t orig = 0;
 	uint64_t o1 = 0;
 	uint64_t o2 = 0;
-	uint32_t e = 0;
+	uint64_t e = 0;
 	uint32_t f = 0;
 	uint8_t data[1024] = { };
 	uint8_t out[1024] = { };

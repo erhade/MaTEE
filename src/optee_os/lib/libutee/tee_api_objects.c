@@ -47,6 +47,7 @@ void __utee_from_gp11_attr(struct utee_attribute *ua,
 }
 
 void check_object(TEE_ObjectHandle *object);
+void check_EnumHandle(TEE_ObjectEnumHandle *objectEnumerator);
 
 void check_object(TEE_ObjectHandle *object)
 {
@@ -64,6 +65,25 @@ void check_object(TEE_ObjectHandle *object)
 		if (res != TEE_SUCCESS)
 			TEE_Panic(res);
 		*object = (TEE_ObjectHandle) data;
+	}
+}
+
+void check_EnumHandle(TEE_ObjectEnumHandle *objectEnumerator)
+{
+	TEE_Result res = TEE_SUCCESS;
+	uint64_t s_data = (uint64_t) *objectEnumerator;
+	uint64_t data = s_data;
+
+	if (*objectEnumerator != TEE_HANDLE_NULL)
+	{
+		res = _utee_autia(SESSION_PUBLIC, &data);
+		if (res == TEE_ERROR_PAC_FAIL) {
+			data = s_data;
+			res = _utee_autia(SESSION_PRIVATE, &data);
+		}
+		if (res != TEE_SUCCESS)
+			TEE_Panic(res);
+		*objectEnumerator = (TEE_ObjectEnumHandle) data;
 	}
 }
 
@@ -828,6 +848,11 @@ TEE_Result TEE_AllocatePersistentObjectEnumerator(TEE_ObjectEnumHandle *
 {
 	TEE_Result res;
 	uint32_t oe;
+	uint32_t flag = SESSION_PUBLIC;
+	uint64_t s_data = 0;
+
+	if (objectEnumerator && *objectEnumerator == (TEE_ObjectEnumHandle) SESSION_PRIVATE)
+		flag = SESSION_PRIVATE;
 
 	__utee_check_out_annotation(objectEnumerator,
 				    sizeof(*objectEnumerator));
@@ -839,6 +864,13 @@ TEE_Result TEE_AllocatePersistentObjectEnumerator(TEE_ObjectEnumHandle *
 
 	*objectEnumerator = (TEE_ObjectEnumHandle)(uintptr_t)oe;
 
+	if (res == TEE_SUCCESS) {
+		s_data = (uint64_t) *objectEnumerator;
+		res = _utee_pacia(flag, &s_data);
+		if (res == TEE_SUCCESS)
+			*objectEnumerator = (TEE_ObjectEnumHandle) s_data;
+	}
+
 	if (res != TEE_SUCCESS &&
 	    res != TEE_ERROR_ACCESS_CONFLICT)
 		TEE_Panic(res);
@@ -849,6 +881,7 @@ TEE_Result TEE_AllocatePersistentObjectEnumerator(TEE_ObjectEnumHandle *
 void TEE_FreePersistentObjectEnumerator(TEE_ObjectEnumHandle objectEnumerator)
 {
 	TEE_Result res;
+	check_EnumHandle(&objectEnumerator);
 
 	if (objectEnumerator == TEE_HANDLE_NULL)
 		return;
@@ -862,6 +895,7 @@ void TEE_FreePersistentObjectEnumerator(TEE_ObjectEnumHandle objectEnumerator)
 void TEE_ResetPersistentObjectEnumerator(TEE_ObjectEnumHandle objectEnumerator)
 {
 	TEE_Result res;
+	check_EnumHandle(&objectEnumerator);
 
 	if (objectEnumerator == TEE_HANDLE_NULL)
 		return;
@@ -877,6 +911,7 @@ TEE_Result TEE_StartPersistentObjectEnumerator(TEE_ObjectEnumHandle
 					       uint32_t storageID)
 {
 	TEE_Result res;
+	check_EnumHandle(&objectEnumerator);
 
 	res = _utee_storage_start_enum((unsigned long)objectEnumerator,
 				       storageID);
@@ -897,6 +932,7 @@ TEE_Result TEE_GetNextPersistentObject(TEE_ObjectEnumHandle objectEnumerator,
 	struct utee_object_info info = { };
 	TEE_Result res = TEE_SUCCESS;
 	uint64_t len = 0;
+	check_EnumHandle(&objectEnumerator);
 
 	if (objectInfo)
 		__utee_check_out_annotation(objectInfo, sizeof(*objectInfo));
@@ -939,6 +975,7 @@ __GP11_TEE_GetNextPersistentObject(TEE_ObjectEnumHandle objectEnumerator,
 	struct utee_object_info info = { };
 	TEE_Result res = TEE_SUCCESS;
 	uint64_t len = 0;
+	check_EnumHandle(&objectEnumerator);
 
 	if (objectInfo)
 		__utee_check_out_annotation(objectInfo, sizeof(*objectInfo));
