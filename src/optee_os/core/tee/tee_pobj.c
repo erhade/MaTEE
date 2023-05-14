@@ -4,6 +4,7 @@
  */
 
 #include <kernel/mutex.h>
+#include <kernel/tee_ta_manager.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tee/tee_pobj.h>
@@ -64,6 +65,8 @@ TEE_Result tee_pobj_get(TEE_UUID *uuid, void *obj_id, uint32_t obj_id_len,
 {
 	TEE_Result res = TEE_SUCCESS;
 	struct tee_pobj *o = NULL;
+	struct ts_session *sess = ts_get_current_session();
+	struct tee_ta_session *ta_sess = to_ta_session(sess);
 
 	*obj = NULL;
 
@@ -79,6 +82,23 @@ TEE_Result tee_pobj_get(TEE_UUID *uuid, void *obj_id, uint32_t obj_id_len,
 	}
 
 	if (*obj) {
+		if ((*obj)->random_val != ta_sess->random_val) {
+			res = TEE_ERROR_ACCESS_CONFLICT;
+			goto out;
+		}
+		if ((*obj)->new_open) {
+			(*obj)->new_open = false;
+			(*obj)->flags = 0;
+			(*obj)->refcnt = 1;
+			(*obj)->flags = flags;
+			(*obj)->fops = fops;
+			memcpy(&(*obj)->uuid, uuid, sizeof(TEE_UUID));
+			if (usage == TEE_POBJ_USAGE_CREATE) {
+				(*obj)->temporary = true;
+				(*obj)->creating = true;
+			}
+			goto out;
+		}
 		if (usage == TEE_POBJ_USAGE_ENUM) {
 			(*obj)->refcnt++;
 			goto out;
@@ -105,6 +125,7 @@ TEE_Result tee_pobj_get(TEE_UUID *uuid, void *obj_id, uint32_t obj_id_len,
 	memcpy(&o->uuid, uuid, sizeof(TEE_UUID));
 	o->flags = flags;
 	o->fops = fops;
+	o->random_val = ta_sess->random_val;
 
 	if (usage == TEE_POBJ_USAGE_CREATE) {
 		o->temporary = true;

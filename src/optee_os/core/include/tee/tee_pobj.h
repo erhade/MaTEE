@@ -22,6 +22,8 @@ struct tee_pobj {
 	bool creating;	/* can only be changed with mutex held */
 	/* Filesystem handling this object */
 	const struct tee_file_operations *fops;
+	bool new_open;
+	uint32_t random_val;
 };
 
 enum tee_pobj_usage {

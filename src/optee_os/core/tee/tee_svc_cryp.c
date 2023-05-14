@@ -22,6 +22,7 @@
 #include <tee_api_types.h>
 #include <tee/tee_cryp_utl.h>
 #include <tee/tee_obj.h>
+#include <tee/tee_pobj.h>
 #include <tee/tee_svc_cryp.h>
 #include <tee/tee_svc.h>
 #include <trace.h>
@@ -1617,6 +1618,7 @@ TEE_Result syscall_cryp_obj_close(unsigned long obj)
 	struct ts_session *sess = ts_get_current_session();
 	TEE_Result res = TEE_SUCCESS;
 	struct tee_obj *o = NULL;
+	struct user_ta_ctx *utc = NULL;
 
 	res = tee_obj_get(to_user_ta_ctx(sess->ctx), uref_to_vaddr(obj), &o);
 	if (res != TEE_SUCCESS)
@@ -1628,8 +1630,17 @@ TEE_Result syscall_cryp_obj_close(unsigned long obj)
 	 */
 	if (o->busy)
 		return TEE_ERROR_ITEM_NOT_FOUND;
+	
+	utc = to_user_ta_ctx(sess->ctx);
 
-	tee_obj_close(to_user_ta_ctx(sess->ctx), o);
+	if (o->info.handleFlags & TEE_HANDLE_FLAG_PERSISTENT) {
+		o->pobj->new_open = true;
+		TAILQ_REMOVE(&utc->objects, o, link);
+		o->pobj->fops->close(&o->fh);
+		tee_obj_free(o);
+	}
+	else
+		tee_obj_close(utc, o);
 	return TEE_SUCCESS;
 }
 
