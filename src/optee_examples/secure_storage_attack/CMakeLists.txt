@@ -1,4 +1,4 @@
-project (secure_storage C)
+project (secure_storage_attack C)
 
 set (SRC host/main.c)
 

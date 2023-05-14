@@ -28,13 +28,40 @@
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 /* OP-TEE TEE client API (built by optee_client) */
 #include <tee_client_api.h>
 
-/* TA API: UUID and command IDs */
-#include <secure_storage_ta.h>
+/* UUID of the trusted application */
+#define TA_SECURE_STORAGE_ATTACK_UUID \
+		{ 0xf4e750bb, 0x1437, 0x4fbf, \
+			{ 0x87, 0x85, 0x8d, 0x35, 0x80, 0xc3, 0x49, 0x94 } }
+/*
+ * TA_SECURE_STORAGE_ATTACK_CMD_READ_RAW - Create and fill a secure storage file
+ * param[0] (memref) ID used the identify the persistent object
+ * param[1] (memref) Raw data dumped from the persistent object
+ * param[2] unused
+ * param[3] unused
+ */
+#define TA_SECURE_STORAGE_ATTACK_CMD_READ_RAW		0
+
+/*
+ * TA_SECURE_STORAGE_ATTACK_CMD_WRITE_RAW - Create and fill a secure storage file
+ * param[0] (memref) ID used the identify the persistent object
+ * param[1] (memref) Raw data to be writen in the persistent object
+ * param[2] unused
+ * param[3] unused
+ */
+#define TA_SECURE_STORAGE_ATTACK_CMD_WRITE_RAW		1
+
+/*
+ * TA_SECURE_STORAGE_ATTACK_CMD_DELETE - Delete a persistent object
+ * param[0] (memref) ID used the identify the persistent object
+ * param[1] unused
+ * param[2] unused
+ * param[3] unused
+ */
+#define TA_SECURE_STORAGE_ATTACK_CMD_DELETE		2
 
 /* TEE resources */
 struct test_ctx {
@@ -44,7 +71,7 @@ struct test_ctx {
 
 void prepare_tee_session(struct test_ctx *ctx)
 {
-	TEEC_UUID uuid = TA_SECURE_STORAGE_UUID;
+	TEEC_UUID uuid = TA_SECURE_STORAGE_ATTACK_UUID;
 	uint32_t origin;
 	TEEC_Result res;
 
@@ -87,7 +114,7 @@ TEEC_Result read_secure_object(struct test_ctx *ctx, char *id,
 	op.params[1].tmpref.size = data_len;
 
 	res = TEEC_InvokeCommand(&ctx->sess,
-				 TA_SECURE_STORAGE_CMD_READ_RAW,
+				 TA_SECURE_STORAGE_ATTACK_CMD_READ_RAW,
 				 &op, &origin);
 	switch (res) {
 	case TEEC_SUCCESS:
@@ -121,7 +148,7 @@ TEEC_Result write_secure_object(struct test_ctx *ctx, char *id,
 	op.params[1].tmpref.size = data_len;
 
 	res = TEEC_InvokeCommand(&ctx->sess,
-				 TA_SECURE_STORAGE_CMD_WRITE_RAW,
+				 TA_SECURE_STORAGE_ATTACK_CMD_WRITE_RAW,
 				 &op, &origin);
 	if (res != TEEC_SUCCESS)
 		printf("Command WRITE_RAW failed: 0x%x / %u\n", res, origin);
@@ -151,7 +178,7 @@ TEEC_Result delete_secure_object(struct test_ctx *ctx, char *id)
 	op.params[0].tmpref.size = id_len;
 
 	res = TEEC_InvokeCommand(&ctx->sess,
-				 TA_SECURE_STORAGE_CMD_DELETE,
+				 TA_SECURE_STORAGE_ATTACK_CMD_DELETE,
 				 &op, &origin);
 
 	switch (res) {
@@ -172,33 +199,15 @@ int main(void)
 {
 	struct test_ctx ctx;
 	char obj1_id[] = "object#1";		/* string identification for the object */
-	char obj1_data[TEST_OBJECT_SIZE];
 	char read_data[TEST_OBJECT_SIZE];
 	char sample_data[SAMPLE_SIZE];
 	TEEC_Result res;
 
-	printf("Prepare session with the TA\n");
 	prepare_tee_session(&ctx);
 
 	/*
 	 * Create object, read it, delete it.
 	 */
-	printf("\nTest on object \"%s\"\n", obj1_id);
-
-	printf("- Create and load object in the TA secure storage\n");
-
-	memset(obj1_data, 'A', sizeof(obj1_data));
-
-	res = write_secure_object(&ctx, obj1_id,
-				  obj1_data, sizeof(obj1_data));
-	if (res != TEEC_SUCCESS)
-		errx(1, "Failed to create an object in the secure storage");
-
-	strncpy(sample_data, obj1_data, SAMPLE_SIZE - 1);
-	puts(sample_data);
-
-	useconds_t usec = 15000000;
-    usleep(usec);
 
 	printf("- Read back the object\n");
 
@@ -206,19 +215,10 @@ int main(void)
 				 read_data, sizeof(read_data));
 	if (res != TEEC_SUCCESS)
 		errx(1, "Failed to read an object from the secure storage");
-	if (memcmp(obj1_data, read_data, sizeof(obj1_data)))
-		errx(1, "Unexpected content found in secure storage");
 
 	strncpy(sample_data, read_data, SAMPLE_SIZE - 1);
 	puts(sample_data);
 
-	printf("- Delete the object\n");
-
-	res = delete_secure_object(&ctx, obj1_id);
-	if (res != TEEC_SUCCESS)
-		errx(1, "Failed to delete the object: 0x%x", res);
-
-	printf("\nWe're done, close and release TEE resources\n");
 	terminate_tee_session(&ctx);
 	return 0;
 }

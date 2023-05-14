@@ -191,7 +191,6 @@ static TEE_Result read_raw_object(uint32_t param_types, TEE_Param params[4])
 		TEE_Free(data);
 		return res;
 	}
-
 	res = TEE_GetObjectInfo1(object, &object_info);
 	if (res != TEE_SUCCESS) {
 		EMSG("Failed to create persistent object, res=0x%08x", res);
@@ -207,7 +206,6 @@ static TEE_Result read_raw_object(uint32_t param_types, TEE_Param params[4])
 		res = TEE_ERROR_SHORT_BUFFER;
 		goto exit;
 	}
-
 	res = TEE_ReadObjectData(object, data, object_info.dataSize,
 				 &read_bytes);
 	if (res == TEE_SUCCESS)
@@ -217,7 +215,6 @@ static TEE_Result read_raw_object(uint32_t param_types, TEE_Param params[4])
 				res, read_bytes, object_info.dataSize);
 		goto exit;
 	}
-
 	/* Return the number of byte effectively filled */
 	params[1].memref.size = read_bytes;
 exit:
