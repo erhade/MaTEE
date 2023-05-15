@@ -24,6 +24,7 @@ struct tee_pobj {
 	const struct tee_file_operations *fops;
 	bool new_open;
 	uint32_t random_val;
+	uint32_t session_id;
 };
 
 enum tee_pobj_usage {

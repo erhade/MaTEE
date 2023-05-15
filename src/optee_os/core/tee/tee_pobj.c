@@ -86,9 +86,17 @@ TEE_Result tee_pobj_get(TEE_UUID *uuid, void *obj_id, uint32_t obj_id_len,
 			res = TEE_ERROR_ACCESS_CONFLICT;
 			goto out;
 		}
+		if (((*obj)->flags & TEE_DATA_FLAG_SESSION_PRIVATE)
+			&& (*obj)->session_id != ta_sess->id) {
+			res = TEE_ERROR_ACCESS_CONFLICT;
+			goto out;
+		}
 		if ((*obj)->new_open) {
 			(*obj)->new_open = false;
-			(*obj)->flags = 0;
+			if (((*obj)->flags & TEE_DATA_FLAG_SESSION_PRIVATE))
+				(*obj)->flags = TEE_DATA_FLAG_SESSION_PRIVATE;
+			else
+				(*obj)->flags = 0;
 			(*obj)->refcnt = 1;
 			(*obj)->flags = flags;
 			(*obj)->fops = fops;
@@ -126,6 +134,7 @@ TEE_Result tee_pobj_get(TEE_UUID *uuid, void *obj_id, uint32_t obj_id_len,
 	o->flags = flags;
 	o->fops = fops;
 	o->random_val = ta_sess->random_val;
+	o->session_id = ta_sess->id;
 
 	if (usage == TEE_POBJ_USAGE_CREATE) {
 		o->temporary = true;

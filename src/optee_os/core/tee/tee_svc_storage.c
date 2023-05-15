@@ -315,6 +315,7 @@ TEE_Result syscall_storage_obj_create(unsigned long storage_id, void *object_id,
 	const unsigned long valid_flags = TEE_DATA_FLAG_ACCESS_READ |
 					  TEE_DATA_FLAG_ACCESS_WRITE |
 					  TEE_DATA_FLAG_ACCESS_WRITE_META |
+					  TEE_DATA_FLAG_SESSION_PRIVATE |
 					  TEE_DATA_FLAG_SHARE_READ |
 					  TEE_DATA_FLAG_SHARE_WRITE |
 					  TEE_DATA_FLAG_OVERWRITE;
