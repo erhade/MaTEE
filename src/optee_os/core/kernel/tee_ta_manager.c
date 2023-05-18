@@ -16,6 +16,7 @@
 #include <kernel/thread.h>
 #include <kernel/user_mode_ctx.h>
 #include <kernel/user_ta.h>
+#include <kernel/tee_time.h>
 #include <malloc.h>
 #include <mm/core_memprot.h>
 #include <mm/core_mmu.h>
@@ -634,19 +635,25 @@ static uint32_t new_session_id(struct tee_ta_session_head *open_sessions)
 	struct tee_ta_session *last = NULL;
 	uint32_t saved = 0;
 	uint32_t id = 1;
+	TEE_Time ti;
+	tee_time_get_sys_time(&ti);
 
 	last = TAILQ_LAST(open_sessions, tee_ta_session_head);
 	if (last) {
 		/* This value is less likely to be already used */
-		id = last->id + 1;
+		id = ((last->id) & 0xFFFF) + 1;
 		if (!id)
 			id++; /* 0 is not valid */
 	}
 
 	saved = id;
 	do {
-		if (!tee_ta_find_session_nolock(id, open_sessions))
+		if (!tee_ta_find_session_nolock(id, open_sessions)) {
 			return id;
+			id &= 0xFFFF;
+			ti.seconds &= 0xFFFF;
+			id |= (ti.seconds << 16);
+		}
 		id++;
 		if (!id)
 			id++;
