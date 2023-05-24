@@ -1,1 +1,1 @@
-# SoulboundTEE
+# MaTEE
