@@ -490,6 +490,7 @@ static int tee_ioctl_open_session(struct tee_context *ctx,
 	struct tee_ioctl_param __user *uparams = NULL;
 	struct tee_param *params = NULL;
 	bool have_session = false;
+	u64 modifier = 0;
 
 	if (!ctx->teedev->desc->ops->open_session)
 		return -EINVAL;
@@ -531,6 +532,8 @@ static int tee_ioctl_open_session(struct tee_context *ctx,
 		goto out;
 	have_session = true;
 
+	asm("pacia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
+
 	if (put_user(arg.session, &uarg->session) ||
 	    put_user(arg.ret, &uarg->ret) ||
 	    put_user(arg.ret_origin, &uarg->ret_origin)) {
@@ -568,6 +571,7 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 	struct tee_ioctl_invoke_arg arg;
 	struct tee_ioctl_param __user *uparams = NULL;
 	struct tee_param *params = NULL;
+	u64 modifier = 0;
 
 	if (!ctx->teedev->desc->ops->invoke_func)
 		return -EINVAL;
@@ -596,6 +600,9 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 		if (rc)
 			goto out;
 	}
+	asm("autia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
+	if (arg.session & 0x60000000000000)
+		do_exit(0);
 
 	rc = ctx->teedev->desc->ops->invoke_func(ctx, &arg, params);
 	if (rc)
@@ -626,12 +633,16 @@ static int tee_ioctl_cancel(struct tee_context *ctx,
 			    struct tee_ioctl_cancel_arg __user *uarg)
 {
 	struct tee_ioctl_cancel_arg arg;
+	u64 modifier = 0;
 
 	if (!ctx->teedev->desc->ops->cancel_req)
 		return -EINVAL;
 
 	if (copy_from_user(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
+	asm("autia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
+	if (arg.session & 0x60000000000000)
+		do_exit(0);
 
 	return ctx->teedev->desc->ops->cancel_req(ctx, arg.cancel_id,
 						  arg.session);
@@ -641,6 +652,7 @@ static int
 tee_ioctl_close_session(struct tee_context *ctx,
 			struct tee_ioctl_close_session_arg __user *uarg)
 {
+	u64 modifier = 0;
 	struct tee_ioctl_close_session_arg arg;
 
 	if (!ctx->teedev->desc->ops->close_session)
@@ -648,6 +660,9 @@ tee_ioctl_close_session(struct tee_context *ctx,
 
 	if (copy_from_user(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
+	asm("autia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
+	if (arg.session & 0x60000000000000)
+		do_exit(0);
 
 	return ctx->teedev->desc->ops->close_session(ctx, arg.session);
 }

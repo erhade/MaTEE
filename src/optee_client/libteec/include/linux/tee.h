@@ -228,7 +228,7 @@ struct tee_ioctl_open_session_arg {
 	__u8 clnt_uuid[TEE_IOCTL_UUID_LEN];
 	__u32 clnt_login;
 	__u32 cancel_id;
-	__u32 session;
+	__u64 session;
 	__u32 ret;
 	__u32 ret_origin;
 	__u32 num_params;

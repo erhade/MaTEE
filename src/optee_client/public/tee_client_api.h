@@ -389,7 +389,7 @@ typedef union {
 typedef struct {
 	/* Implementation defined */
 	TEEC_Context *ctx;
-	uint32_t session_id;
+	uint64_t session_id;
 } TEEC_Session;
 
 /**
