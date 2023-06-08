@@ -11,9 +11,9 @@
 - **Qualcomm's [introduction](https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/pointer-auth-v7.pdf) to the ARMv8.3 Pointer Authentication feature may help you better understand it.**
 
 ---
-
+ 
 ## 📦 1 Prerequisites
-Install the dependencies in the [list](https://optee.readthedocs.io/en/latest/building/prerequisites.html). Since we are using Ubuntu 22.04, it is recommended that you choose the same operating system.
+Install the dependencies in the [list](https://optee.readthedocs.io/en/latest/building/prerequisites.html). In addition, you need to install `python2`. Since we are using Ubuntu 22.04, it is recommended that you choose the same operating system.
 
 ## 👷‍♂️ 2 Setup
 ### 2.1 build
