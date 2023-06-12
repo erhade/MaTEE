@@ -675,8 +675,8 @@ void TEEC_CloseSession(TEEC_Session *session)
 		return;
 
 	arg.session = session->session_id;
-	if (ioctl(session->ctx->fd, TEE_IOC_CLOSE_SESSION, &arg))
-		EMSG("Failed to close session 0x%lx", session->session_id);
+	ioctl(session->ctx->fd, TEE_IOC_CLOSE_SESSION, &arg);
+		/* EMSG("Failed to close session 0x%lx", session->session_id); */
 }
 
 TEEC_Result TEEC_InvokeCommand(TEEC_Session *session, uint32_t cmd_id,

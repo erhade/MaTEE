@@ -405,8 +405,13 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 			if (ip.c != TEE_MEMREF_NULL) {
 				asm("autia %[reg], %[mod]" : [reg] "+r" (ip.c) : [mod] "r" (modifier) : );
 
-				if (ip.c & 0x60000000000000)
-					do_exit(0);
+				if (ip.c & 0x60000000000000) {
+					#ifdef SECURE_EVALUATION
+					printk("\033[1;37;41mDetect shared memory hijacking\033[0m\n");
+					#else
+    				do_exit(0);
+					#endif
+				}
 				/*
 				 * If we fail to get a pointer to a shared
 				 * memory object (and increase the ref count)
@@ -601,15 +606,26 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 			goto out;
 	}
 	asm("autia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
-	if (arg.session & 0x60000000000000)
-		do_exit(0);
+	if (arg.session & 0x60000000000000) {
+		#ifdef SECURE_EVALUATION
+		printk("\033[1;37;41mDetect session hijacking\033[0m\n");
+		#else
+    	do_exit(0);
+		#endif
+	}
 
 	rc = ctx->teedev->desc->ops->invoke_func(ctx, &arg, params);
 	if (rc)
 		goto out;
 
 	if (arg.ret == 0xFFFF3002) /* TEE_ERROR_PAC_FAIL */
-		do_exit(0);
+	{
+		#ifdef SECURE_EVALUATION
+		printk("\033[1;37;41mDetect session-based attacks\033[0m\n");
+		#else
+    	do_exit(0);
+		#endif
+	}
 
 	if (put_user(arg.ret, &uarg->ret) ||
 	    put_user(arg.ret_origin, &uarg->ret_origin)) {
@@ -642,7 +658,13 @@ static int tee_ioctl_cancel(struct tee_context *ctx,
 		return -EFAULT;
 	asm("autia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
 	if (arg.session & 0x60000000000000)
-		do_exit(0);
+	{
+		#ifdef SECURE_EVALUATION
+		printk("\033[1;37;41mDetect session hijacking\033[0m\n");
+		#else
+    	do_exit(0);
+		#endif
+	}
 
 	return ctx->teedev->desc->ops->cancel_req(ctx, arg.cancel_id,
 						  arg.session);
@@ -653,6 +675,7 @@ tee_ioctl_close_session(struct tee_context *ctx,
 			struct tee_ioctl_close_session_arg __user *uarg)
 {
 	u64 modifier = 0;
+	u64 session_id = 0;
 	struct tee_ioctl_close_session_arg arg;
 
 	if (!ctx->teedev->desc->ops->close_session)
@@ -660,9 +683,17 @@ tee_ioctl_close_session(struct tee_context *ctx,
 
 	if (copy_from_user(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
-	asm("autia %[reg], %[mod]" : [reg] "+r" (arg.session) : [mod] "r" (modifier) : );
-	if (arg.session & 0x60000000000000)
-		do_exit(0);
+	
+	session_id = arg.session;
+	asm("autia %[reg], %[mod]" : [reg] "+r" (session_id) : [mod] "r" (modifier) : );
+	if (session_id & 0x60000000000000)
+	{
+		#ifdef SECURE_EVALUATION
+    	printk("\033[1;37;41mDetect session hijacking\033[0m\n");
+		#else
+    	do_exit(0);
+		#endif
+	}
 
 	return ctx->teedev->desc->ops->close_session(ctx, arg.session);
 }

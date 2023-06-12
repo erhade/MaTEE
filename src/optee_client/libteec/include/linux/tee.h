@@ -258,7 +258,7 @@ struct tee_ioctl_open_session_arg {
  */
 struct tee_ioctl_invoke_arg {
 	__u32 func;
-	__u32 session;
+	__u64 session;
 	__u32 cancel_id;
 	__u32 ret;
 	__u32 ret_origin;
@@ -283,7 +283,7 @@ struct tee_ioctl_invoke_arg {
  */
 struct tee_ioctl_cancel_arg {
 	__u32 cancel_id;
-	__u32 session;
+	__u64 session;
 };
 
 /**
@@ -297,7 +297,7 @@ struct tee_ioctl_cancel_arg {
  * @session:	[in] Session id
  */
 struct tee_ioctl_close_session_arg {
-	__u32 session;
+	__u64 session;
 };
 
 /**
