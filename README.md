@@ -27,13 +27,13 @@ make run-only
 ```
 There will be two separate consoles, one for the non-secure world and another for the secure world.
 <p align="center">
-  <img width="600" src="./pictures/run.png" alt="run">
+  <img width="" src="./pictures/run.png" alt="run">
 </p>
 
 ### 2.3 login
 Enter `root` in the console of the non-secure world.
 
-## 📝 3 Test
+## 📝 3 Performance Evaluation
 **It should be noted that the project runs on the FVP simulator, and the results may differ from testing on a real development board.**
 ### 3.1 TEE Client APIs.
 ```shell
@@ -60,3 +60,18 @@ trusted_keys
 cd /mnt/host/scripts/darknet
 sh run_darknet.sh
 ```
+## 🔒 4 Security Evaluation
+- Recompile the project.
+```shell
+cd src/build
+make PAUTH=y SECURE_EVALUATION=y all -j `nproc`
+```
+- Repeat steps 2.2 and 2.3.
+- Execute the victim CA, and then launch the malicious CA.
+```shell
+semantic_victim &
+semantic_attack
+```
+<p align="center">
+  <img width="" src="./pictures/security.png" alt="security">
+</p>
