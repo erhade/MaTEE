@@ -82,13 +82,11 @@ TEE_Result tee_pobj_get(TEE_UUID *uuid, void *obj_id, uint32_t obj_id_len,
 	}
 
 	if (*obj) {
-		if ((*obj)->random_val != ta_sess->random_val) {
-			res = TEE_ERROR_ACCESS_CONFLICT;
-			goto out;
-		}
-		if (((*obj)->flags & TEE_DATA_FLAG_SESSION_PRIVATE)
-			&& (*obj)->session_id != ta_sess->id) {
-			res = TEE_ERROR_ACCESS_CONFLICT;
+		if (((*obj)->random_val != ta_sess->random_val) || 
+		(((*obj)->flags & TEE_DATA_FLAG_SESSION_PRIVATE) && 
+		(*obj)->session_id != ta_sess->id)) {
+			ta_sess->pac_fail = true;
+			res = TEE_ERROR_PAC_FAIL;
 			goto out;
 		}
 		if ((*obj)->new_open) {

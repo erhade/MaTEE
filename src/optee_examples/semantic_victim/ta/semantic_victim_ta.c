@@ -144,6 +144,98 @@ static TEE_Result store_secret(uint32_t param_types,
 	return TEE_SUCCESS;
 }
 
+static TEE_Result alloc_heap(uint32_t param_types, TEE_Param params[4])
+{
+	TEE_Result res = TEE_SUCCESS;
+	uint64_t *state = NULL;
+
+	uint32_t exp_param_types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_INVARIANT_VALUE_OUTPUT,
+						   TEE_PARAM_TYPE_NONE,
+						   TEE_PARAM_TYPE_NONE,
+						   TEE_PARAM_TYPE_NONE);
+
+	if (param_types != exp_param_types) {
+		EMSG("Expected: 0x%x, got: 0x%x", exp_param_types, param_types);
+		return TEE_ERROR_BAD_PARAMETERS;
+	}
+
+	state = TEE_Malloc(sizeof(uint64_t), 0);
+	if (!state)
+		return TEE_ERROR_OUT_OF_MEMORY;
+
+	SET_INVARIANT_PARAMS(params[0], state, SESSION_PUBLIC);
+
+	return res;
+}
+
+static TEE_Result read_heap(uint32_t param_types, TEE_Param params[4])
+{
+	TEE_Result res = TEE_SUCCESS;
+	uint64_t *state = NULL;
+
+	DMSG("has been called");
+
+	uint32_t exp_param_types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT,
+						   TEE_PARAM_TYPE_VALUE_OUTPUT,
+						   TEE_PARAM_TYPE_NONE,
+						   TEE_PARAM_TYPE_NONE);
+
+	if (param_types != exp_param_types) {
+		EMSG("Expected: 0x%x, got: 0x%x", exp_param_types, param_types);
+		return TEE_ERROR_BAD_PARAMETERS;
+	}
+
+	state = params[0].value.a;
+
+	params[1].value.a = (*state) >> 32;
+	params[1].value.b = (*state) & 0xffffffff;
+	IMSG("load secret: 0x%X%X from SW", params[1].value.a, params[1].value.b);
+
+	return res;
+}
+
+static TEE_Result write_heap(uint32_t param_types, TEE_Param params[4])
+{
+	TEE_Result res = TEE_SUCCESS;
+	uint64_t *state = NULL;
+
+	uint32_t exp_param_types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT,
+						   TEE_PARAM_TYPE_VALUE_INPUT,
+						   TEE_PARAM_TYPE_NONE,
+						   TEE_PARAM_TYPE_NONE);
+
+	if (param_types != exp_param_types) {
+		EMSG("Expected: 0x%x, got: 0x%x", exp_param_types, param_types);
+		return TEE_ERROR_BAD_PARAMETERS;
+	}
+
+	state = params[0].value.a;
+
+	IMSG("store secret: 0x%X%X from NW", params[1].value.a, params[1].value.b);
+	*state = ((uint64_t)params[1].value.a << 32) + params[1].value.b;
+
+	return res;
+}
+
+static TEE_Result release_heap(uint32_t param_types, TEE_Param params[4])
+{
+	TEE_Result res = TEE_SUCCESS;
+
+	uint32_t exp_param_types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_INVARIANT_VALUE_INPUT,
+						   TEE_PARAM_TYPE_NONE,
+						   TEE_PARAM_TYPE_NONE,
+						   TEE_PARAM_TYPE_NONE);
+
+	if (param_types != exp_param_types) {
+		EMSG("Expected: 0x%x, got: 0x%x", exp_param_types, param_types);
+		return TEE_ERROR_BAD_PARAMETERS;
+	}
+
+	TEE_Free((void *)params[0].value.a);
+
+	return res;
+}
+
 static TEE_Result secure_initialize(uint32_t param_types,
 	TEE_Param params[4])
 {
@@ -402,6 +494,14 @@ TEE_Result TA_InvokeCommandEntryPoint(void __unused *sess_ctx,
 		return read_raw_object(param_types, params);
 	case TA_SECURE_STORAGE_CMD_DELETE:
 		return delete_object(param_types, params);
+	case TA_HEAP_PARAM_PAC_CMD_ALLOC_HEAP:
+		return alloc_heap(param_types, params);
+	case TA_HEAP_PARAM_PAC_CMD_READ_HEAP:
+		return read_heap(param_types, params);
+	case TA_HEAP_PARAM_PAC_CMD_WRITE_HEAP:
+		return write_heap(param_types, params);
+	case TA_HEAP_PARAM_PAC_CMD_RELEASE_HEAP:
+		return release_heap(param_types, params);
 	default:
 		return TEE_ERROR_BAD_PARAMETERS;
 	}
