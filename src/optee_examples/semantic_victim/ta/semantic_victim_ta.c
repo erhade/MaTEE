@@ -470,6 +470,99 @@ exit:
 	return res;
 }
 
+static TEE_Result cmd_gen_key(uint32_t pt, TEE_Param params[TEE_NUM_PARAMS])
+{
+	TEE_Result res;
+	uint32_t key_size;
+	TEE_ObjectHandle key;
+	const uint32_t key_type = TEE_TYPE_RSA_KEYPAIR;
+	const uint32_t exp_pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INOUT,
+						TEE_PARAM_TYPE_NONE,
+						TEE_PARAM_TYPE_NONE,
+						TEE_PARAM_TYPE_NONE);
+
+	if (pt != exp_pt)
+		return TEE_ERROR_BAD_PARAMETERS;
+
+	key_size = params[0].value.a;
+
+	res = TEE_AllocateTransientObject(key_type, key_size, &key);
+	if (res) {
+		EMSG("TEE_AllocateTransientObject(%#" PRIx32 ", %" PRId32 "): %#" PRIx32, key_type, key_size, res);
+		return res;
+	}
+
+	res = TEE_GenerateKey(key, key_size, NULL, 0);
+	if (res) {
+		EMSG("TEE_GenerateKey(%" PRId32 "): %#" PRIx32,
+		     key_size, res);
+		TEE_FreeTransientObject(key);
+		return res;
+	}
+
+	params[0].value.a = (uint64_t) key >> 32;
+	params[0].value.b = (uint64_t) key & 0xffffffff;
+	return TEE_SUCCESS;
+}
+
+static TEE_Result cmd_enc(uint32_t pt, TEE_Param params[TEE_NUM_PARAMS])
+{
+	TEE_Result res;
+	const void *inbuf;
+	uint32_t inbuf_len;
+	void *outbuf;
+	uint32_t outbuf_len;
+	TEE_OperationHandle op;
+	TEE_ObjectInfo key_info;
+	TEE_ObjectHandle key;
+	const uint32_t alg = TEE_ALG_RSAES_PKCS1_V1_5;
+	const uint32_t exp_pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
+						TEE_PARAM_TYPE_MEMREF_INPUT,
+						TEE_PARAM_TYPE_MEMREF_OUTPUT,
+						TEE_PARAM_TYPE_NONE);
+
+	if (pt != exp_pt)
+		return TEE_ERROR_BAD_PARAMETERS;
+	
+	key = (TEE_ObjectHandle) (((uint64_t) params[0].value.a) << 32 | params[0].value.b);
+
+	res = TEE_GetObjectInfo1(key, &key_info);
+	if (res) {
+		EMSG("TEE_GetObjectInfo1: %#" PRIx32, res);
+		return res;
+	}
+
+	inbuf = params[1].memref.buffer;
+	inbuf_len = params[1].memref.size;
+	outbuf = params[2].memref.buffer;
+	outbuf_len = params[2].memref.size;
+
+	res = TEE_AllocateOperation(&op, alg, TEE_MODE_ENCRYPT,
+				    key_info.keySize);
+	if (res) {
+		EMSG("TEE_AllocateOperation(TEE_MODE_ENCRYPT, %#" PRIx32 ", %" PRId32 "): %#" PRIx32, alg, key_info.keySize, res);
+		return res;
+	}
+
+	res = TEE_SetOperationKey(op, key);
+	if (res) {
+		EMSG("TEE_SetOperationKey: %#" PRIx32, res);
+		goto out;
+	}
+
+	res = TEE_AsymmetricEncrypt(op, NULL, 0, inbuf, inbuf_len, outbuf,
+				    &outbuf_len);
+	if (res) {
+		EMSG("TEE_AsymmetricEncrypt(%" PRId32 ", %" PRId32 "): %#" PRIx32, inbuf_len, params[2].memref.size, res);
+	}
+	params[2].memref.size = outbuf_len;
+
+out:
+	TEE_FreeOperation(op);
+	return res;
+
+}
+
 /*
  * Called when a TA is invoked. sess_ctx hold that value that was
  * assigned by TA_OpenSessionEntryPoint(). The rest of the paramters
@@ -502,6 +595,10 @@ TEE_Result TA_InvokeCommandEntryPoint(void __unused *sess_ctx,
 		return write_heap(param_types, params);
 	case TA_HEAP_PARAM_PAC_CMD_RELEASE_HEAP:
 		return release_heap(param_types, params);
+	case TA_ACIPHER_CMD_GEN_KEY:
+		return cmd_gen_key(param_types, params);
+	case TA_ACIPHER_CMD_ENCRYPT:
+		return cmd_enc(param_types, params);
 	default:
 		return TEE_ERROR_BAD_PARAMETERS;
 	}

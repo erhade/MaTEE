@@ -223,8 +223,32 @@ int main(void)
     sharedData[0] = addr;
     sharedData[1] = sign;
 
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_NONE,
+					 TEEC_NONE, TEEC_NONE);
+	op.params[0].value.a = 1024;
+
+	res = TEEC_InvokeCommand(&sess, TA_ACIPHER_CMD_GEN_KEY, &op,
+				 &err_origin);
+	if (res != TEEC_SUCCESS)
+		errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x",
+			res, err_origin);
+	
+	int shmid_acipher;
+    key_t key_acipher = ftok("shared_memory_key", 456);
+
+    shmid_acipher = shmget(key_acipher, size, IPC_CREAT | 0666);
+
+    uint32_t* shared_acipher = (uint32_t*)shmat(shmid_acipher, NULL, 0);
+
+    shared_acipher[0] = op.params[0].value.a;
+    shared_acipher[1] = op.params[0].value.b;
+
 	useconds_t usec = 10000000;
     usleep(usec);
+
+	shmdt(shared_acipher);
+	shmctl(shmid_acipher, IPC_RMID, NULL);
 
 	shmdt(sharedData);
     shmctl(shmid, IPC_RMID, NULL);

