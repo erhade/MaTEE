@@ -14,10 +14,10 @@
     "@commitlint/cli": "^16.1.0",
     "@commitlint/config-conventional": "^16.0.0",
     "@commitlint/cz-commitlint": "^16.1.0",
-    "commitizen": "^4.2.4",
+    "commitizen": "^4.3.2",
     "conventional-changelog-tf-a": "file:tools/conventional-changelog-tf-a",
     "husky": "^7.0.4",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.3.0",
     "standard-version": "^9.3.2"
   }
 }
